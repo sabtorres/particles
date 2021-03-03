@@ -43,6 +43,9 @@ int main() {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
+    // initialize
+    Shader shader = Shader();
+
     // render loop
     while(!glfwWindowShouldClose(window))
     {
@@ -51,6 +54,7 @@ int main() {
         glfwSwapBuffers(window);
     }
 
+    shader.cleanup();
     glfwTerminate();
 
     return 0;
