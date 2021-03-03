@@ -7,6 +7,7 @@ pfx = 'src/'
 sources = [
     pfx + 'main.cpp',
     pfx + 'glad.cpp',
+    pfx + 'renderer.cpp',
     pfx + 'particle_source.cpp',
     pfx + 'shader.cpp',
 ]
