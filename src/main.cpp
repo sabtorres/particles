@@ -1,9 +1,11 @@
 #include <cstdio>
+#include <ctime>
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <particle_source.hpp>
 #include <shader.hpp>
+#include <renderer.hpp>
 
 const uint WINDOW_WIDTH = 1920;
 const uint WINDOW_HEIGHT = 1080;
@@ -43,14 +45,23 @@ int main() {
 
     // initialize
     Shader shader = Shader();
+    ParticleSource source = ParticleSource();
 
     // render loop
+    double delta_time = 0;
+    clock_t begin_time = std::clock();
     while(!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        source.update(delta_time);
+        render(source, shader);
         glfwSwapBuffers(window);
-    }
 
+        clock_t end_time = std::clock();
+        delta_time = end_time - begin_time;
+    }
+    
+    source.cleanup();
     shader.cleanup();
     glfwTerminate();
 
