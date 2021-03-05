@@ -53,14 +53,15 @@ int main() {
     while(!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //source.update(delta_time);
-        //render(source, shader);
+        source.update(delta_time);
+        render(source, shader);
         glfwSwapBuffers(window);
 
         auto end_time = std::chrono::high_resolution_clock::now();
         delta_time = std::chrono::duration<double>(
-            (end_time - begin_time)).count();
-        printf("FPS: %f\n", 1.0 / delta_time * 1000.0);
+            (end_time - begin_time)).count() / 1000.0;
+        printf("FPS: %f\n", 1.0 / delta_time);
+        begin_time = std::chrono::high_resolution_clock::now();
     }
     
     source.cleanup();
