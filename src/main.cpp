@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <ctime>
+#include <chrono>
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -49,16 +49,18 @@ int main() {
 
     // render loop
     double delta_time = 0;
-    clock_t begin_time = std::clock();
+    auto begin_time = std::chrono::high_resolution_clock::now();
     while(!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        source.update(delta_time);
-        render(source, shader);
+        //source.update(delta_time);
+        //render(source, shader);
         glfwSwapBuffers(window);
 
-        clock_t end_time = std::clock();
-        delta_time = end_time - begin_time;
+        auto end_time = std::chrono::high_resolution_clock::now();
+        delta_time = std::chrono::duration<double>(
+            (end_time - begin_time)).count();
+        printf("FPS: %f\n", 1.0 / delta_time * 1000.0);
     }
     
     source.cleanup();

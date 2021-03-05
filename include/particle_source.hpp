@@ -24,7 +24,9 @@ struct ParticleSource {
     glm::vec3 rotation;
 
     uint number_of_particles;
-    float explosiveness;
+    double cycle;
+    double cycle_timer;
+    uint particle_index;
 
     glm::vec3 initial_velocity;
     float velocity_randomness;
