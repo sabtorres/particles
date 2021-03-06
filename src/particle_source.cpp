@@ -53,7 +53,6 @@ ParticleSource::ParticleSource() {
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    printf("%d\n", texture.data[0]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width,
         texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data.data());
     
