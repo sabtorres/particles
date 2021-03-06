@@ -55,7 +55,7 @@ ParticleSource::ParticleSource() {
 
     printf("%d\n", texture.data[0]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width,
-        texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data);
+        texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data.data());
     
     glBindVertexArray(0);
 }
@@ -133,7 +133,7 @@ void ParticleSource::bind_buffers() {
 }
 
 void ParticleSource::draw() {
-    glPointSize(10.0);
+    glPointSize(15.0);
     glDrawArrays(GL_POINTS, 0, number_of_particles);
 }
 

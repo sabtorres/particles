@@ -1,13 +1,13 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 struct Texture {
-    std::string filename;
-    unsigned char* data;
-    int width;
-    int height;
-    int number_of_components;
+    const char* filename;
+    std::vector<unsigned char> data;
+    uint width;
+    uint height;
 
     Texture();
     ~Texture();

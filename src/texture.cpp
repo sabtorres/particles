@@ -1,18 +1,19 @@
 #include <texture.hpp>
 #include <system_error>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include <lodepng.h>
 
 Texture::Texture() {
     filename = "../resources/tex1.png";
-    data = stbi_load(filename.c_str(), &width, &height,
-        &number_of_components, 0);
+    std::vector<unsigned char> png;
 
-	if(stbi_failure_reason()) {
-		throw std::runtime_error(stbi_failure_reason());
-	}
+    unsigned error = lodepng::load_file(png, filename);
+    if (error != 0) {
+        throw std::runtime_error(lodepng_error_text(error));
+    }
+
+    error = lodepng::decode(data, width, height, png);
 }
 
 Texture::~Texture() {
-    stbi_image_free(data);
+    
 }

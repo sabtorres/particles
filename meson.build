@@ -7,10 +7,11 @@ pfx = 'src/'
 sources = [
     pfx + 'main.cpp',
     pfx + 'glad.cpp',
+    pfx + 'lodepng.cpp',
     pfx + 'renderer.cpp',
     pfx + 'particle_source.cpp',
     pfx + 'shader.cpp',
-    pfx + 'texture.cpp'
+    pfx + 'texture.cpp',
 ]
 
 glm = dependency('glm', version : '>=0.9.9')
