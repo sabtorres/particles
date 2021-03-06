@@ -7,6 +7,7 @@
 struct Particle {
     glm::vec3 position;
     glm::vec3 velocity;
+    glm::vec3 acceleration;
     glm::vec4 color;
     float life;
 };
@@ -15,10 +16,12 @@ struct ParticleSource {
     GLuint vao;
     GLuint offset_bo;
     GLuint uv_bo;
+    GLuint life_bo;
     GLuint texture_pointer;
 
     std::vector<Particle> particles;
     std::vector<glm::vec3> position_buffer;
+    std::vector<float> life_buffer;
 
     glm::vec3 position;
     glm::vec3 rotation;
@@ -39,4 +42,5 @@ struct ParticleSource {
     void update(double delta_time);
     void bind_buffers();
     void draw();
+    float random_throw();
 };
