@@ -1,7 +1,7 @@
 #include <particle_source.hpp>
 #include <ctime>
 #include <random>
-const float TEST_RANDOMNESS = 0.5;
+const float TEST_RANDOMNESS = 0.4;
 
 ParticleSource::ParticleSource() {
     position = glm::vec3(0.0);
@@ -120,5 +120,6 @@ void ParticleSource::draw() {
 }
 
 float ParticleSource::random_throw() {
-    return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+    float u = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+    return (u * 2.0) - 1.0;
 }
