@@ -3,6 +3,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glad/glad.h>
+#include <texture.hpp>
 
 struct Particle {
     glm::vec3 position;
@@ -17,7 +18,8 @@ struct ParticleSource {
     GLuint offset_bo;
     GLuint uv_bo;
     GLuint life_bo;
-    GLuint texture_pointer;
+    Texture texture;
+    GLuint texture_buffer;
 
     std::vector<Particle> particles;
     std::vector<glm::vec3> position_buffer;

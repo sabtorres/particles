@@ -1,22 +1,22 @@
 #include <particle_source.hpp>
 #include <ctime>
 #include <random>
-const float TEST_RANDOMNESS = 0.4;
+const float TEST_RANDOMNESS = 0.9;
 
 ParticleSource::ParticleSource() {
     position = glm::vec3(0.0);
     rotation = glm::vec3(0.0);
 
-    number_of_particles = 50;
+    number_of_particles = 100;
     cycle = 1.0;
     cycle_timer = cycle;
     particle_index = 0;
 
-    initial_velocity = glm::vec3(1.0);
+    initial_velocity = glm::vec3(0.3);
     velocity_randomness = TEST_RANDOMNESS;
-    initial_acceleration = glm::vec3(1.0);
+    initial_acceleration = glm::vec3(0.3);
     acceleration_randomness = TEST_RANDOMNESS;
-    color = glm::vec4(1.0, 0.0, 0.0, 1.0);
+    color = glm::vec4(1.0, 1.0, 1.0, 1.0);
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -43,10 +43,25 @@ ParticleSource::ParticleSource() {
     glBufferData(GL_ARRAY_BUFFER, number_of_particles
         * sizeof(float), life_buffer.data(), GL_DYNAMIC_DRAW);
     
+    texture = Texture();
+    glGenTextures(1, &texture_buffer);
+	glBindTexture(GL_TEXTURE_2D, texture_buffer);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    printf("%d\n", texture.data[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width,
+        texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data);
+    
     glBindVertexArray(0);
 }
 
 void ParticleSource::cleanup() {
+    glDeleteTextures(1, &this->texture_buffer);
     glDeleteBuffers(1, &this->offset_bo);
     glDeleteBuffers(1, &this->life_bo);
     glDeleteVertexArrays(1, &this->vao);
@@ -100,6 +115,9 @@ void ParticleSource::update(double delta_time) {
 
 void ParticleSource::bind_buffers() {
     glBindVertexArray(vao);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_buffer);
 
     glBindBuffer(GL_ARRAY_BUFFER, offset_bo);
     glBufferSubData(GL_ARRAY_BUFFER, 0,

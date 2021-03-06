@@ -10,6 +10,7 @@ sources = [
     pfx + 'renderer.cpp',
     pfx + 'particle_source.cpp',
     pfx + 'shader.cpp',
+    pfx + 'texture.cpp'
 ]
 
 glm = dependency('glm', version : '>=0.9.9')

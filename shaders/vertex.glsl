@@ -12,6 +12,7 @@ uniform mat4 projection_matrix;
 
 void main() {
     color = vec4(life, 0.0, 0.0, 1.0); // to do;
+    fragment_uv = vec2(0.5, 0.5);
     gl_Position = projection_matrix * view_matrix
         * model_matrix * vec4(offset, 1.0);
 }
