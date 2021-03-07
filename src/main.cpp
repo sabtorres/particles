@@ -6,6 +6,7 @@
 #include <particle_source.hpp>
 #include <shader.hpp>
 #include <renderer.hpp>
+#include <menu.hpp>
 
 const uint WINDOW_WIDTH = 1920;
 const uint WINDOW_HEIGHT = 1080;
@@ -44,6 +45,7 @@ int main() {
     glBlendEquation(GL_FUNC_ADD);
 
     // initialize
+    Menu menu = Menu(window);
     Shader shader = Shader();
     ParticleSource source = ParticleSource();
 
@@ -55,6 +57,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         source.update(delta_time);
         render(source, shader);
+        menu.render(source);
         glfwSwapBuffers(window);
 
         auto end_time = std::chrono::high_resolution_clock::now();
@@ -64,6 +67,7 @@ int main() {
         begin_time = std::chrono::high_resolution_clock::now();
     }
     
+    menu.cleanup();
     source.cleanup();
     shader.cleanup();
     glfwTerminate();

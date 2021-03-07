@@ -28,7 +28,7 @@ struct ParticleSource {
     glm::vec3 position;
     glm::vec3 rotation;
 
-    uint number_of_particles;
+    int number_of_particles;
     double cycle;
     double cycle_timer;
     uint particle_index;

@@ -21,7 +21,7 @@ ParticleSource::ParticleSource() {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    for (uint i = 0; i < number_of_particles; i++) {
+    for (int i = 0; i < number_of_particles; i++) {
         position_buffer.push_back(glm::vec3(0.0));
         life_buffer.push_back(0.0);
         particles.push_back(Particle {
@@ -69,13 +69,13 @@ void ParticleSource::cleanup() {
 void ParticleSource::update(double delta_time) {
     double previous_timer = cycle_timer;
     cycle_timer -= delta_time;
-    uint new_particles = (uint) (floor(previous_timer * number_of_particles) - 
+    int new_particles = (int) (floor(previous_timer * number_of_particles) - 
         floor(cycle_timer * number_of_particles));
-    uint next_index = particle_index + new_particles;
+    int next_index = particle_index + new_particles;
     float velocity_length = glm::length(initial_velocity);
     float acceleration_length = glm::length(initial_acceleration);
 
-    for (uint i = particle_index; i < next_index; i++) {
+    for (int i = particle_index; i < next_index; i++) {
         particles[i % number_of_particles].life = cycle;
         particles[i % number_of_particles].position = glm::vec3(0.0);
         particles[i % number_of_particles].velocity = initial_velocity
@@ -91,7 +91,7 @@ void ParticleSource::update(double delta_time) {
         particles[i % number_of_particles].color = color;
     }
     
-    for (uint i = 0; i < number_of_particles; i++) {
+    for (int i = 0; i < number_of_particles; i++) {
         if (particles[i].life > 0.0) {
             particles[i].life -= delta_time;
             particles[i].velocity += particles[i].acceleration
