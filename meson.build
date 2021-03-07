@@ -3,23 +3,24 @@ project('particles', 'cpp', default_options : 'std=c++11 -g3')
 cc = meson.get_compiler('cpp')
 incdir = 'include/'
 pfx = 'src/'
+third_party_pfx = 'third_party/'
 imgui_pfx = 'src/imgui/'
 
 sources = [
     pfx + 'main.cpp',
-    pfx + 'glad.cpp',
-    pfx + 'lodepng.cpp',
-    imgui_pfx + 'imgui.cpp',
-    imgui_pfx + 'imgui_impl_glfw.cpp',
-    imgui_pfx + 'imgui_impl_opengl3.cpp',
-    imgui_pfx + 'imgui_widgets.cpp',
-    imgui_pfx + 'imgui_tables.cpp',
-    imgui_pfx + 'imgui_draw.cpp',
     pfx + 'renderer.cpp',
     pfx + 'menu.cpp',
     pfx + 'particle_source.cpp',
     pfx + 'shader.cpp',
     pfx + 'texture.cpp',
+    third_party_pfx + 'glad/glad.cpp',
+    third_party_pfx + 'lodepng/lodepng.cpp',
+    third_party_pfx + 'imgui/imgui.cpp',
+    third_party_pfx + 'imgui/imgui_impl_glfw.cpp',
+    third_party_pfx + 'imgui/imgui_impl_opengl3.cpp',
+    third_party_pfx + 'imgui/imgui_widgets.cpp',
+    third_party_pfx + 'imgui/imgui_tables.cpp',
+    third_party_pfx + 'imgui/imgui_draw.cpp',
 ]
 
 glm = dependency('glm', version : '>=0.9.9')
@@ -28,7 +29,10 @@ libdl = cc.find_library('dl')
 glfw = dependency('glfw3')
 
 executable('demo', sources,
-include_directories : incdir,
+include_directories : [
+    incdir,
+    third_party_pfx
+],
 dependencies : [
     glm,
     gl,

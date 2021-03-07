@@ -1,6 +1,6 @@
 #pragma once
 
-#include <imgui.h>
+#include <imgui/imgui.h>
 #include <particle_source.hpp>
 #include <GLFW/glfw3.h>
 

@@ -1,6 +1,6 @@
 #include <texture.hpp>
 #include <system_error>
-#include <lodepng.h>
+#include <lodepng/lodepng.h>
 
 Texture::Texture() {
     filename = "../resources/tex1.png";
