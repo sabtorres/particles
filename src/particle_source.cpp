@@ -19,30 +19,11 @@ ParticleSource::ParticleSource() {
     color = glm::vec4(1.0, 1.0, 1.0, 1.0);
 
     glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    for (int i = 0; i < number_of_particles; i++) {
-        position_buffer.push_back(glm::vec3(0.0));
-        life_buffer.push_back(0.0);
-        particles.push_back(Particle {
-            glm::vec3(0.0),
-            initial_velocity,
-            initial_acceleration,
-            color,
-            0.0
-        });
-    }
-
     glGenBuffers(1, &offset_bo);
-    glBindBuffer(GL_ARRAY_BUFFER, offset_bo);
-    glBufferData(GL_ARRAY_BUFFER, number_of_particles 
-        * sizeof(glm::vec3), position_buffer.data(), GL_DYNAMIC_DRAW);
-    
     glGenBuffers(1, &life_bo);
-    glBindBuffer(GL_ARRAY_BUFFER, life_bo);
-    glBufferData(GL_ARRAY_BUFFER, number_of_particles
-        * sizeof(float), life_buffer.data(), GL_DYNAMIC_DRAW);
+    update_buffer_sizes();
     
+    glBindVertexArray(vao);
     texture = Texture();
     glGenTextures(1, &texture_buffer);
 	glBindTexture(GL_TEXTURE_2D, texture_buffer);
