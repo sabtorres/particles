@@ -6,7 +6,6 @@ Menu::Menu(GLFWwindow* window) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.DisplaySize = ImVec2(400.0, 200.0);
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 450");
@@ -19,19 +18,30 @@ void Menu::render(ParticleSource& source) {
     ImGui::NewFrame();
     ImGui::Begin("Menu");
     if(show_demo_window) {
-        ImGui::SliderFloat("Initial velocity X",
-        &source.initial_velocity.x, 0.0f, 10.0f);
-        ImGui::SliderFloat("Initial velocity Y",
-        &source.initial_velocity.y, 0.0f, 10.0f);
-        ImGui::SliderFloat("Initial velocity Z",
-        &source.initial_velocity.z, 0.0f, 10.0f);
+        ImGui::SliderFloat("Cycle",
+            &source.cycle, 0.0f, 10.0f);
+        if (ImGui::SliderInt("Number of particles",
+            &source.number_of_particles, 1, 9999)) {
+                source.update_buffer_sizes();
+            }
 
+        ImGui::SliderFloat("Velocity randomness",
+            &source.velocity_randomness, 0.0f, 1.0f);
+        ImGui::SliderFloat("Initial velocity X",
+            &source.initial_velocity.x, -10.0f, 10.0f);
+        ImGui::SliderFloat("Initial velocity Y",
+            &source.initial_velocity.y, -10.0f, 10.0f);
+        ImGui::SliderFloat("Initial velocity Z",
+            &source.initial_velocity.z, -10.0f, 10.0f);
+
+        ImGui::SliderFloat("Acceleration randomness",
+            &source.acceleration_randomness, 0.0f, 1.0f);
         ImGui::SliderFloat("Initial acceleration X",
-            &source.initial_acceleration.x, 0.0f, 10.0f);
+            &source.initial_acceleration.x, -10.0f, 10.0f);
         ImGui::SliderFloat("Initial acceleration Y",
-            &source.initial_acceleration.y, 0.0f, 10.0f);
+            &source.initial_acceleration.y, -10.0f, 10.0f);
         ImGui::SliderFloat("Initial acceleration Z",
-            &source.initial_acceleration.z, 0.0f, 10.0f);
+            &source.initial_acceleration.z, -10.0f, 10.0f);
     }
     ImGui::End();
     ImGui::Render();

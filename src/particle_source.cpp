@@ -69,8 +69,8 @@ void ParticleSource::cleanup() {
 void ParticleSource::update(double delta_time) {
     double previous_timer = cycle_timer;
     cycle_timer -= delta_time;
-    int new_particles = (int) (floor(previous_timer * number_of_particles) - 
-        floor(cycle_timer * number_of_particles));
+    int new_particles = (int) (floor(previous_timer / cycle * number_of_particles) - 
+        floor(cycle_timer / cycle * number_of_particles));
     int next_index = particle_index + new_particles;
     float velocity_length = glm::length(initial_velocity);
     float acceleration_length = glm::length(initial_acceleration);
@@ -79,12 +79,12 @@ void ParticleSource::update(double delta_time) {
         particles[i % number_of_particles].life = cycle;
         particles[i % number_of_particles].position = glm::vec3(0.0);
         particles[i % number_of_particles].velocity = initial_velocity
-            * (1 - velocity_randomness) + velocity_randomness
+            * (1.0f - velocity_randomness) + velocity_randomness
             * glm::vec3(random_throw() * velocity_length,
                 random_throw() * velocity_length, 
                 random_throw() * velocity_length);
         particles[i % number_of_particles].acceleration = initial_acceleration
-            * (1 - acceleration_randomness) + acceleration_randomness
+            * (1.0f - acceleration_randomness) + acceleration_randomness
             * glm::vec3(random_throw() * acceleration_length,
                 random_throw() * acceleration_length, 
                 random_throw() * acceleration_length);
@@ -109,7 +109,40 @@ void ParticleSource::update(double delta_time) {
         life_buffer[i] = particles[i].life;
     }
 
+    if (cycle_timer < 0) {
+        cycle_timer = cycle;
+    }
     particle_index = next_index % number_of_particles;
+}
+
+void ParticleSource::update_buffer_sizes() {
+    particles.clear();
+    position_buffer.clear();
+    life_buffer.clear();
+
+    for (int i = 0; i < number_of_particles; i++) {
+        position_buffer.push_back(glm::vec3(0.0));
+        life_buffer.push_back(0.0);
+        particles.push_back(Particle {
+            glm::vec3(0.0),
+            initial_velocity,
+            initial_acceleration,
+            color,
+            0.0
+        });
+    }
+
+    glBindVertexArray(vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, offset_bo);
+    glBufferData(GL_ARRAY_BUFFER, number_of_particles 
+        * sizeof(glm::vec3), position_buffer.data(), GL_DYNAMIC_DRAW);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, life_bo);
+    glBufferData(GL_ARRAY_BUFFER, number_of_particles
+        * sizeof(float), life_buffer.data(), GL_DYNAMIC_DRAW);
+    
+    glBindVertexArray(0);
 }
 
 void ParticleSource::bind_buffers() {

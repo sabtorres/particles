@@ -29,6 +29,9 @@ void render(ParticleSource& source, const Shader& shader) {
     auto model_loc = glGetUniformLocation(shader.program, "model_matrix");
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, &model_mat[0][0]);
 
+    auto cycle_loc = glGetUniformLocation(shader.program, "cycle");
+    glUniform1f(cycle_loc, source.cycle);
+
     source.bind_buffers();
     source.draw();
 

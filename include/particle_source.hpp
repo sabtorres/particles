@@ -29,7 +29,7 @@ struct ParticleSource {
     glm::vec3 rotation;
 
     int number_of_particles;
-    double cycle;
+    float cycle;
     double cycle_timer;
     uint particle_index;
 
@@ -42,6 +42,7 @@ struct ParticleSource {
     ParticleSource();
     void cleanup();
     void update(double delta_time);
+    void update_buffer_sizes();
     void bind_buffers();
     void draw();
     float random_throw();
