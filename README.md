@@ -17,6 +17,8 @@ my goal is to build a particle simulation system that can be customizable by art
 
 # maybe to-dos (these features are lesser priority and may or may not go to the list above)
 
+- camera input and grid for better 3D view
+
 - SPIR-V shaders (requires updating to GL 4.6)
 
 - Bezier curves to determine particle path
