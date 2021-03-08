@@ -24,6 +24,10 @@ void Menu::render(ParticleSource& source) {
             &source.number_of_particles, 1, 9999)) {
                 source.update_buffer_sizes();
             }
+        ImGui::SliderFloat("Point size",
+            &source.point_size, 1.0f, 100.0f);
+        ImGui::SliderFloat("Explosiveness",
+            &source.explosiveness, 0.0f, 1.0f);
 
         ImGui::SliderFloat("Velocity randomness",
             &source.velocity_randomness, 0.0f, 1.0f);

@@ -1,6 +1,8 @@
 #include <particle_source.hpp>
 #include <ctime>
 #include <random>
+
+#define CLAMP(x) x >= 0.0 ? 1.0 : 0.0;
 const float TEST_RANDOMNESS = 0.9;
 
 ParticleSource::ParticleSource() {
@@ -10,7 +12,10 @@ ParticleSource::ParticleSource() {
     number_of_particles = 100;
     cycle = 1.0;
     cycle_timer = cycle;
+    point_size = 15.0;
+    explosiveness = 0.0;
     particle_index = 0;
+    particles_left = number_of_particles;
 
     initial_velocity = glm::vec3(0.3);
     velocity_randomness = TEST_RANDOMNESS;
@@ -50,9 +55,16 @@ void ParticleSource::cleanup() {
 void ParticleSource::update(double delta_time) {
     double previous_timer = cycle_timer;
     cycle_timer -= delta_time;
-    int new_particles = (int) (floor(previous_timer / cycle * number_of_particles) - 
-        floor(cycle_timer / cycle * number_of_particles));
+
+    float previous_factor = floor((previous_timer / cycle)
+        * number_of_particles);
+    float cycle_factor = floor((cycle_timer / cycle) 
+        * number_of_particles);
+    int new_particles = (int) (previous_factor - cycle_factor
+        + particles_left * explosiveness);
+    particles_left -= new_particles;
     int next_index = particle_index + new_particles;
+    
     float velocity_length = glm::length(initial_velocity);
     float acceleration_length = glm::length(initial_acceleration);
 
@@ -92,6 +104,7 @@ void ParticleSource::update(double delta_time) {
 
     if (cycle_timer < 0) {
         cycle_timer = cycle;
+        particles_left = number_of_particles;
     }
     particle_index = next_index % number_of_particles;
 }
@@ -146,7 +159,7 @@ void ParticleSource::bind_buffers() {
 }
 
 void ParticleSource::draw() {
-    glPointSize(15.0);
+    glPointSize(point_size);
     glDrawArrays(GL_POINTS, 0, number_of_particles);
 }
 

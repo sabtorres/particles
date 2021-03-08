@@ -31,7 +31,10 @@ struct ParticleSource {
     int number_of_particles;
     float cycle;
     double cycle_timer;
-    uint particle_index;
+    float point_size;
+    float explosiveness;
+    int particle_index;
+    int particles_left;
 
     glm::vec3 initial_velocity;
     float velocity_randomness;

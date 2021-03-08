@@ -9,8 +9,6 @@ my goal is to build a particle simulation system that can be customizable by art
 
 - GPU particle support
 
-- particle explosiveness factor
-
 - GUI to change the particle texture
 
 # maybe to-dos (these features are lesser priority and may or may not go to the list above)
