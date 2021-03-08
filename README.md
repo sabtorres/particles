@@ -13,11 +13,15 @@ my goal is to build a particle simulation system that can be customizable by art
 
 - spawn radius
 
+- support for multiple textures
+
 # maybe to-dos (these features are lesser priority and may or may not go to the list above)
 
 - SPIR-V shaders (requires updating to GL 4.6)
 
 - Bezier curves to determine particle path
+
+- pre-calculated noise buffers for randomness (will only be done if further optimization is necessary)
 
 # requirements for building
 
@@ -51,7 +55,7 @@ just run **demo** (from the build directory). there will be a GUI in the display
 
 # contributing
 
-i'm not accepting contributions right now, but maybe i will in the future.
+i'm not accepting PRs right now, but maybe i will in the future.
 
 open an issue if you have a problem, question or suggestion.
 
