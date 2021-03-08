@@ -1,5 +1,7 @@
 # particles
- Real time particle system using OpenGL 4 and C++
+Real time particle system using OpenGL 4 and C++
+
+![Example 1](showcase/particle_example1.webp)
  
 my goal is to build a particle simulation system that can be customizable by artists and designers, and easily extended by a graphics programmer. this is free software, without warranties.
 
