@@ -28,6 +28,8 @@ void Menu::render(ParticleSource& source) {
             &source.point_size, 1.0f, 100.0f);
         ImGui::SliderFloat("Explosiveness",
             &source.explosiveness, 0.0f, 1.0f);
+        ImGui::SliderFloat("Emission radius",
+            &source.emission_radius, 0.0f, 10.0f);
 
         ImGui::SliderFloat("Velocity randomness",
             &source.velocity_randomness, 0.0f, 1.0f);

@@ -1,6 +1,7 @@
 #include <particle_source.hpp>
 #include <ctime>
 #include <random>
+#include <cmath>
 
 #define CLAMP(x) x >= 0.0 ? 1.0 : 0.0;
 const float TEST_RANDOMNESS = 0.9;
@@ -14,6 +15,7 @@ ParticleSource::ParticleSource() {
     cycle_timer = cycle;
     point_size = 15.0;
     explosiveness = 0.0;
+    emission_radius = 0.0;
     particle_index = 0;
     particles_left = number_of_particles;
 
@@ -70,7 +72,7 @@ void ParticleSource::update(double delta_time) {
 
     for (int i = particle_index; i < next_index; i++) {
         particles[i % number_of_particles].life = cycle;
-        particles[i % number_of_particles].position = glm::vec3(0.0);
+        particles[i % number_of_particles].position = spawn_position();
         particles[i % number_of_particles].velocity = initial_velocity
             * (1.0f - velocity_randomness) + velocity_randomness
             * glm::vec3(random_throw() * velocity_length,
@@ -163,7 +165,26 @@ void ParticleSource::draw() {
     glDrawArrays(GL_POINTS, 0, number_of_particles);
 }
 
+float ParticleSource::random_uniform(float scale) {
+    return (static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX))
+        * scale;
+}
+
 float ParticleSource::random_throw() {
-    float u = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-    return (u * 2.0) - 1.0;
+    return (random_uniform(1.0) * 2.0) - 1.0;
+}
+
+glm::vec3 ParticleSource::spawn_position() {
+    float r = random_uniform(emission_radius);
+    float theta = random_uniform(2.0 * M_PI);
+    float phi = random_uniform(M_PI);
+    return spherical_to_xyz(r, theta, phi);
+}
+
+glm::vec3 ParticleSource::spherical_to_xyz(float r, float theta, float phi) {
+    return glm::vec3(
+        r * sinf(theta) * sinf(phi),
+        r * sinf(theta) * cosf(phi),
+        r * cosf(theta)
+    );
 }

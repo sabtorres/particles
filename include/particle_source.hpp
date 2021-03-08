@@ -33,6 +33,7 @@ struct ParticleSource {
     double cycle_timer;
     float point_size;
     float explosiveness;
+    float emission_radius;
     int particle_index;
     int particles_left;
 
@@ -48,5 +49,8 @@ struct ParticleSource {
     void update_buffer_sizes();
     void bind_buffers();
     void draw();
+    float random_uniform(float scale);
     float random_throw();
+    glm::vec3 spawn_position();
+    glm::vec3 spherical_to_xyz(float r, float theta, float phi);
 };

@@ -63,7 +63,7 @@ int main() {
         auto end_time = std::chrono::high_resolution_clock::now();
         delta_time = std::chrono::duration<double>(
             (end_time - begin_time)).count();
-        printf("FPS: %f\n", 1.0 / delta_time);
+        printf("ms/frame: %f\n", delta_time);
         begin_time = std::chrono::high_resolution_clock::now();
     }
     

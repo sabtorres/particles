@@ -11,8 +11,6 @@ my goal is to build a particle simulation system that can be customizable by art
 
 - GUI to change the particle texture
 
-- spawn radius
-
 - support for multiple textures
 
 # maybe to-dos (these features are lesser priority and may or may not go to the list above)
