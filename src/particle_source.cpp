@@ -137,7 +137,12 @@ void ParticleSource::update_gpu(double delta_time) {
 
     send_uniform_struct(delta_time, new_particles);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo);
-    
+    glBufferData(GL_SHADER_STORAGE_BUFFER, number_of_particles
+        * sizeof(Particle), particles.data(), GL_DYNAMIC_READ);
+    // glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0,
+    //     number_of_particles * sizeof(Particle), particles.data());
+
+    glDispatchCompute((number_of_particles / 64) + 1, 1, 1);
     if (cycle_timer < 0) {
         cycle_timer = cycle;
         particles_left = number_of_particles;
@@ -145,9 +150,7 @@ void ParticleSource::update_gpu(double delta_time) {
     particles_left -= new_particles;
     int next_index = particle_index + new_particles;
     particle_index = next_index % number_of_particles;
-
-    glDispatchCompute(work_x, 1, 1);
-    glMemoryBarrier(GL_UNIFORM_BARRIER_BIT);
+    glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
     void* ptr = glMapNamedBuffer(ssbo, GL_READ_ONLY);
     memcpy(particles.data(), ptr, sizeof(Particle) * number_of_particles);
@@ -157,6 +160,7 @@ void ParticleSource::update_gpu(double delta_time) {
     }
     glUnmapNamedBuffer(ssbo);
 
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     glUseProgram(0);
 }
 
@@ -192,7 +196,7 @@ void ParticleSource::send_uniform_struct(double delta_time, int new_particles) {
 
     auto dt_loc = glGetUniformLocation(compute_program,
         "parameters.delta_time");
-    glUniform1f(dt_loc, delta_time);
+    glUniform1f(dt_loc, (float) delta_time);
     auto pi_loc = glGetUniformLocation(compute_program,
         "parameters.particle_index");
     glUniform1i(pi_loc, particle_index);
@@ -221,7 +225,7 @@ void ParticleSource::update_buffer_sizes() {
 
     glBindBuffer(GL_ARRAY_BUFFER, offset_bo);
     glBufferData(GL_ARRAY_BUFFER, number_of_particles 
-        * sizeof(glm::vec3), position_buffer.data(), GL_DYNAMIC_DRAW);
+        * sizeof(float) * 4, position_buffer.data(), GL_DYNAMIC_DRAW);
     
     glBindBuffer(GL_ARRAY_BUFFER, life_bo);
     glBufferData(GL_ARRAY_BUFFER, number_of_particles
@@ -229,7 +233,7 @@ void ParticleSource::update_buffer_sizes() {
     
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo);
     glBufferData(GL_SHADER_STORAGE_BUFFER, number_of_particles
-        * sizeof(Particle), particles.data(), GL_DYNAMIC_COPY);
+        * sizeof(Particle), particles.data(), GL_DYNAMIC_READ);
 
     glBindVertexArray(0);
 }
@@ -264,7 +268,7 @@ void ParticleSource::bind_buffers() {
 
     glBindBuffer(GL_ARRAY_BUFFER, offset_bo);
     glBufferSubData(GL_ARRAY_BUFFER, 0,
-        number_of_particles * sizeof(glm::vec3), position_buffer.data());
+        number_of_particles * sizeof(float) * 4, position_buffer.data());
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 

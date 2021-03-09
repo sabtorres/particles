@@ -24,8 +24,8 @@ struct Particle {
     float life;
 };
 
-layout (std430, binding = 1) coherent buffer Particles {
-    Particle p[];
+layout (std430, binding = 1) buffer Particles {
+    Particle all_particles[];
 } particles;
 
 void main() {
@@ -33,26 +33,27 @@ void main() {
 
     float velocity_length = parameters.initial_velocity.length();
     float acceleration_length = parameters.initial_acceleration.length();
-    uint index = gl_LocalInvocationIndex % parameters.number_of_particles;
+    uint index = gl_GlobalInvocationID.x % parameters.number_of_particles;
+    Particle p = particles.all_particles[index];
 
     if (index >= parameters.particle_index && index < next_index) {
-        particles.p[index].life = parameters.cycle;
-        particles.p[index].position = vec4(0.0, 0.0, 0.0, 1.0);
-        particles.p[index].velocity = parameters.initial_velocity;
-        particles.p[index].acceleration = parameters.initial_acceleration;
+        p.life = parameters.cycle;
+        p.position = vec4(0.0, 0.0, 0.0, 1.0);
+        p.velocity = parameters.initial_velocity;
+        p.acceleration = parameters.initial_acceleration;
     }
     
-    if (particles.p[index].life > 0.0) {
-        particles.p[index].life -= parameters.delta_time;
-        particles.p[index].velocity +=
-            particles.p[index].acceleration * parameters.delta_time;
-        particles.p[index].position +=
-            particles.p[index].velocity * parameters.delta_time;
+    if (p.life > 0.0) {
+        p.life -= parameters.delta_time;
+        p.velocity += p.acceleration * parameters.delta_time;
+        p.position += p.velocity * parameters.delta_time;
     }
     else {
-        particles.p[index].life = 0.0;
-        particles.p[index].position = vec4(0.0, 0.0, 0.0, 1.0);
-        particles.p[index].velocity = vec4(0.0);
-        particles.p[index].acceleration = vec4(0.0);
+        p.life = 0.0;
+        p.position = vec4(0.0, 0.0, 0.0, 1.0);
+        p.velocity = vec4(0.0);
+        p.acceleration = vec4(0.0);
     }
+
+    particles.all_particles[index] = p;
 }
