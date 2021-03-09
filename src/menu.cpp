@@ -18,6 +18,8 @@ void Menu::render(ParticleSource& source) {
     ImGui::NewFrame();
     ImGui::Begin("Menu");
     if(show_demo_window) {
+        ImGui::Checkbox("GPU compute", &source.mode_gpu);
+
         ImGui::SliderFloat("Cycle",
             &source.cycle, 0.0f, 10.0f);
         if (ImGui::SliderInt("Number of particles",

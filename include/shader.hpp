@@ -13,6 +13,6 @@ struct Shader {
 
     Shader();
     void cleanup();
-    std::string load_shader_string(const std::string& filename);
-    GLint check_shader_error(GLuint shader, GLuint flag, bool is_program);
+    static std::string load_shader_string(const std::string& filename);
+    static GLint check_shader_error(GLuint shader, GLuint flag, bool is_program);
 };

@@ -20,6 +20,10 @@ struct ParticleSource {
     GLuint life_bo;
     Texture texture;
     GLuint texture_buffer;
+    GLuint compute_program;
+    int work_x;
+    int work_y;
+    int work_z;
 
     std::vector<Particle> particles;
     std::vector<glm::vec3> position_buffer;
@@ -28,6 +32,7 @@ struct ParticleSource {
     glm::vec3 position;
     glm::vec3 rotation;
 
+    bool mode_gpu;
     int number_of_particles;
     float cycle;
     double cycle_timer;
@@ -46,9 +51,14 @@ struct ParticleSource {
     ParticleSource();
     void cleanup();
     void update(double delta_time);
+    void update_cpu(double delta_time);
+    void update_gpu(double delta_time);
+    
     void update_buffer_sizes();
+    void generate_gpu_compute();
     void bind_buffers();
     void draw();
+
     float random_uniform(float scale);
     float random_throw();
     glm::vec3 spawn_position();

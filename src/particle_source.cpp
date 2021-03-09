@@ -1,4 +1,5 @@
 #include <particle_source.hpp>
+#include <shader.hpp>
 #include <ctime>
 #include <random>
 #include <cmath>
@@ -10,6 +11,7 @@ ParticleSource::ParticleSource() {
     position = glm::vec3(0.0);
     rotation = glm::vec3(0.0);
 
+    mode_gpu = false;
     number_of_particles = 100;
     cycle = 1.0;
     cycle_timer = cycle;
@@ -44,10 +46,13 @@ ParticleSource::ParticleSource() {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width,
         texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data.data());
     
+    generate_gpu_compute();
+    
     glBindVertexArray(0);
 }
 
 void ParticleSource::cleanup() {
+    glDeleteProgram(compute_program);
     glDeleteTextures(1, &this->texture_buffer);
     glDeleteBuffers(1, &this->offset_bo);
     glDeleteBuffers(1, &this->life_bo);
@@ -55,6 +60,15 @@ void ParticleSource::cleanup() {
 }
 
 void ParticleSource::update(double delta_time) {
+    if(!mode_gpu) {
+        update_cpu(delta_time);
+    }
+    else {
+        update_gpu(delta_time);
+    }
+}
+
+void ParticleSource::update_cpu(double delta_time) {
     double previous_timer = cycle_timer;
     cycle_timer -= delta_time;
 
@@ -111,6 +125,13 @@ void ParticleSource::update(double delta_time) {
     particle_index = next_index % number_of_particles;
 }
 
+void ParticleSource::update_gpu(double delta_time) {
+    glUseProgram(compute_program);
+    glDispatchCompute(work_x, 1, 1);
+    glMemoryBarrier(GL_UNIFORM_BARRIER_BIT);
+    glUseProgram(0);
+}
+
 void ParticleSource::update_buffer_sizes() {
     particles.clear();
     position_buffer.clear();
@@ -139,6 +160,34 @@ void ParticleSource::update_buffer_sizes() {
         * sizeof(float), life_buffer.data(), GL_DYNAMIC_DRAW);
     
     glBindVertexArray(0);
+}
+
+void ParticleSource::generate_gpu_compute() {
+    int work_grp_size[3];
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &work_grp_size[0]);
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &work_grp_size[1]);
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &work_grp_size[2]);
+    work_x = work_grp_size[0];
+    work_y = work_grp_size[1];
+    work_z = work_grp_size[2];
+    
+    GLuint compute_shader = glCreateShader(GL_COMPUTE_SHADER);
+    std::string shader_source = 
+        Shader::load_shader_string("../shaders/compute.glsl");
+    const char* char_pointer_source = shader_source.c_str();
+    int length = shader_source.length();
+    glShaderSource(compute_shader, 1, &char_pointer_source, &length);
+    glCompileShader(compute_shader);
+    Shader::check_shader_error(compute_shader, GL_COMPILE_STATUS, false);
+    compute_program = glCreateProgram();
+    glAttachShader(compute_program, compute_shader);
+    glLinkProgram(compute_program);
+    Shader::check_shader_error(compute_program, GL_LINK_STATUS, true);
+    glValidateProgram(compute_program);
+    Shader::check_shader_error(compute_program, GL_VALIDATE_STATUS, true);
+
+    glDetachShader(compute_program, compute_shader);
+    glDeleteShader(compute_shader);
 }
 
 void ParticleSource::bind_buffers() {
