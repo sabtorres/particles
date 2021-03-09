@@ -30,6 +30,7 @@ ParticleSource::ParticleSource() {
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &offset_bo);
     glGenBuffers(1, &life_bo);
+    glGenBuffers(1, &ssbo);
     update_buffer_sizes();
     
     glBindVertexArray(vao);
@@ -56,6 +57,7 @@ void ParticleSource::cleanup() {
     glDeleteTextures(1, &this->texture_buffer);
     glDeleteBuffers(1, &this->offset_bo);
     glDeleteBuffers(1, &this->life_bo);
+    glDeleteBuffers(1, &this->ssbo);
     glDeleteVertexArrays(1, &this->vao);
 }
 
@@ -127,9 +129,73 @@ void ParticleSource::update_cpu(double delta_time) {
 
 void ParticleSource::update_gpu(double delta_time) {
     glUseProgram(compute_program);
+
+    double previous_timer = cycle_timer;
+    float previous_factor = floor((previous_timer / cycle)
+        * number_of_particles);
+    float cycle_factor = floor((cycle_timer / cycle) 
+        * number_of_particles);
+    int new_particles = (int) (previous_factor - cycle_factor
+        + particles_left * explosiveness);
+
+    send_uniform_struct(delta_time, new_particles);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    
+    if (cycle_timer < 0) {
+        cycle_timer = cycle;
+        particles_left = number_of_particles;
+    }
+    particles_left -= new_particles;
+    int next_index = particle_index + new_particles;
+    particle_index = next_index % number_of_particles;
+
     glDispatchCompute(work_x, 1, 1);
     glMemoryBarrier(GL_UNIFORM_BARRIER_BIT);
+
+    for (int i = 0; i < number_of_particles; i++) {
+        position_buffer[i] = particles[i].position;
+        life_buffer[i] = particles[i].life;
+    }
+
     glUseProgram(0);
+}
+
+void ParticleSource::send_uniform_struct(double delta_time, int new_particles) {
+    auto nop_loc = glGetUniformLocation(compute_program,
+        "parameters.number_of_particles");
+    glUniform1i(nop_loc, number_of_particles);
+    auto cycle_loc = glGetUniformLocation(compute_program,
+        "parameters.cycle");
+    glUniform1f(cycle_loc, cycle);
+    auto explosiveness_loc = glGetUniformLocation(compute_program,
+        "parameters.explosiveness");
+    glUniform1f(explosiveness_loc, explosiveness);
+
+    auto vr_loc = glGetUniformLocation(compute_program,
+        "parameters.velocity_randomness");
+    glUniform1f(vr_loc, velocity_randomness);
+    auto ar_loc = glGetUniformLocation(compute_program,
+        "parameters.acceleration_randomness");
+    glUniform1f(ar_loc, acceleration_randomness);
+
+    auto iv_loc = glGetUniformLocation(compute_program,
+        "parameters.initial_velocity");
+    glUniform3f(iv_loc, initial_velocity.x, initial_velocity.y,
+        initial_velocity.z);
+    auto ia_loc = glGetUniformLocation(compute_program,
+        "parameters.initial_acceleration");
+    glUniform3f(ia_loc, initial_acceleration.x, initial_acceleration.y,
+        initial_acceleration.z);
+
+    auto dt_loc = glGetUniformLocation(compute_program,
+        "parameters.delta_time");
+    glUniform1f(dt_loc, delta_time);
+    auto pi_loc = glGetUniformLocation(compute_program,
+        "parameters.particle_index");
+    glUniform1i(pi_loc, particle_index);
+    auto np_loc = glGetUniformLocation(compute_program,
+        "parameters.new_particles");
+    glUniform1i(np_loc, new_particles);
 }
 
 void ParticleSource::update_buffer_sizes() {
@@ -159,6 +225,10 @@ void ParticleSource::update_buffer_sizes() {
     glBufferData(GL_ARRAY_BUFFER, number_of_particles
         * sizeof(float), life_buffer.data(), GL_DYNAMIC_DRAW);
     
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, number_of_particles
+        * sizeof(Particle), particles.data(), GL_DYNAMIC_DRAW);
+
     glBindVertexArray(0);
 }
 

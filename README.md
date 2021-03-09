@@ -7,7 +7,7 @@ my goal is to build a particle simulation system that can be customizable by art
 
 # to-do list
 
-- GPU particle support
+- GPU particle support (on the way)
 
 - GUI to change the particle texture
 

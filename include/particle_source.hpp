@@ -21,6 +21,7 @@ struct ParticleSource {
     Texture texture;
     GLuint texture_buffer;
     GLuint compute_program;
+    GLuint ssbo;
     int work_x;
     int work_y;
     int work_z;
@@ -53,6 +54,7 @@ struct ParticleSource {
     void update(double delta_time);
     void update_cpu(double delta_time);
     void update_gpu(double delta_time);
+    void send_uniform_struct(double delta_time, int new_particles);
     
     void update_buffer_sizes();
     void generate_gpu_compute();
