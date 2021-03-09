@@ -10,7 +10,7 @@ struct Particle {
     glm::vec4 velocity;
     glm::vec4 acceleration;
     float life;
-    // glm::vec3 padding;
+    glm::vec3 padding;
 };
 
 struct ParticleSource {

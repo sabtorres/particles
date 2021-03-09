@@ -6,6 +6,7 @@
 #include <cstdlib>
 
 const float TEST_RANDOMNESS = 0.9;
+const int LOCAL_GROUPS = 64;
 
 ParticleSource::ParticleSource() {
     position = glm::vec3(0.0);
@@ -138,12 +139,10 @@ void ParticleSource::update_gpu(double delta_time) {
 
     send_uniform_struct(delta_time, new_particles);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo);
-    // glBufferData(GL_SHADER_STORAGE_BUFFER, number_of_particles
-    //     * sizeof(Particle), particles.data(), GL_DYNAMIC_READ);
-    // glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0,
-    //     number_of_particles * sizeof(Particle), particles.data());
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0,
+        number_of_particles * sizeof(Particle), particles.data());
 
-    glDispatchCompute((number_of_particles / 64) + 1, 1, 1);
+    glDispatchCompute((number_of_particles / LOCAL_GROUPS) + 1, 1, 1);
     if (cycle_timer < 0) {
         cycle_timer = cycle;
         particles_left = number_of_particles;
@@ -218,7 +217,8 @@ void ParticleSource::update_buffer_sizes() {
             glm::vec4(0.0, 0.0, 0.0, 1.0),
             initial_velocity,
             initial_acceleration,
-            0.0
+            0.0,
+            glm::vec3(0.0)
         });
     }
 
@@ -234,7 +234,7 @@ void ParticleSource::update_buffer_sizes() {
     
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo);
     glBufferData(GL_SHADER_STORAGE_BUFFER, number_of_particles
-        * sizeof(Particle), particles.data(), GL_DYNAMIC_READ);
+        * sizeof(Particle), particles.data(), GL_DYNAMIC_COPY);
 
     glBindVertexArray(0);
 }

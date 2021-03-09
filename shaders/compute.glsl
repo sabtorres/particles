@@ -16,6 +16,7 @@ layout (binding = 0) uniform Parameters {
     float delta_time;
     int particle_index;
     int new_particles;
+    vec2 padding;
 } parameters;
 
 struct Particle {
@@ -23,7 +24,7 @@ struct Particle {
     vec4 velocity;
     vec4 acceleration;
     float life;
-    // vec3 padding;
+    vec3 padding;
 };
 
 layout (binding = 1) buffer Particles {
