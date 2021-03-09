@@ -1,12 +1,10 @@
 #include <particle_source.hpp>
 #include <shader.hpp>
-#include <ctime>
 #include <random>
 #include <cmath>
 #include <cstring>
 #include <cstdlib>
 
-#define CLAMP(x) x >= 0.0 ? 1.0 : 0.0;
 const float TEST_RANDOMNESS = 0.9;
 
 ParticleSource::ParticleSource() {
@@ -23,11 +21,10 @@ ParticleSource::ParticleSource() {
     particle_index = 0;
     particles_left = number_of_particles;
 
-    initial_velocity = glm::vec3(0.3);
+    initial_velocity = glm::vec4(0.3, 0.3, 0.3, 0.0);
     velocity_randomness = TEST_RANDOMNESS;
-    initial_acceleration = glm::vec3(0.3);
+    initial_acceleration = glm::vec4(0.3, 0.3, 0.3, 0.0);
     acceleration_randomness = TEST_RANDOMNESS;
-    color = glm::vec4(1.0, 1.0, 1.0, 1.0);
 
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &offset_bo);
@@ -93,29 +90,27 @@ void ParticleSource::update_cpu(double delta_time) {
         particles[i % number_of_particles].position = spawn_position();
         particles[i % number_of_particles].velocity = initial_velocity
             * (1.0f - velocity_randomness) + velocity_randomness
-            * glm::vec3(random_throw() * velocity_length,
-                random_throw() * velocity_length, 
-                random_throw() * velocity_length);
+            * glm::vec4(random_throw(), random_throw(), random_throw(), 0.0)
+            * velocity_length;
         particles[i % number_of_particles].acceleration = initial_acceleration
             * (1.0f - acceleration_randomness) + acceleration_randomness
-            * glm::vec3(random_throw() * acceleration_length,
-                random_throw() * acceleration_length, 
-                random_throw() * acceleration_length);
-        particles[i % number_of_particles].color = color;
+            * glm::vec4(random_throw(), random_throw(), random_throw(), 0.0)
+            * acceleration_length;
     }
     
     for (int i = 0; i < number_of_particles; i++) {
         if (particles[i].life > 0.0) {
             particles[i].life -= delta_time;
             particles[i].velocity += particles[i].acceleration
-                * (float)delta_time;
+                * (float) delta_time;
             particles[i].position += particles[i].velocity 
-                * (float)delta_time;
+                * (float) delta_time;
         }
         else {
             particles[i].life = 0.0;
-            particles[i].position = glm::vec3(0.0);
-            particles[i].velocity = glm::vec3(0.0);
+            particles[i].position = glm::vec4(0.0, 0.0, 0.0, 1.0);
+            particles[i].velocity = glm::vec4(0.0, 0.0, 0.0, 0.0);
+            particles[i].acceleration = glm::vec4(0.0, 0.0, 0.0, 0.0);
         }
 
         position_buffer[i] = particles[i].position;
@@ -175,6 +170,9 @@ void ParticleSource::send_uniform_struct(double delta_time, int new_particles) {
     auto explosiveness_loc = glGetUniformLocation(compute_program,
         "parameters.explosiveness");
     glUniform1f(explosiveness_loc, explosiveness);
+    auto radius_loc = glGetUniformLocation(compute_program,
+        "parameters.emission_radius");
+    glUniform1f(radius_loc, emission_radius);
 
     auto vr_loc = glGetUniformLocation(compute_program,
         "parameters.velocity_randomness");
@@ -185,12 +183,12 @@ void ParticleSource::send_uniform_struct(double delta_time, int new_particles) {
 
     auto iv_loc = glGetUniformLocation(compute_program,
         "parameters.initial_velocity");
-    glUniform3f(iv_loc, initial_velocity.x, initial_velocity.y,
-        initial_velocity.z);
+    glUniform4f(iv_loc, initial_velocity.x, initial_velocity.y,
+        initial_velocity.z, initial_velocity.w);
     auto ia_loc = glGetUniformLocation(compute_program,
         "parameters.initial_acceleration");
-    glUniform3f(ia_loc, initial_acceleration.x, initial_acceleration.y,
-        initial_acceleration.z);
+    glUniform4f(ia_loc, initial_acceleration.x, initial_acceleration.y,
+        initial_acceleration.z, initial_acceleration.w);
 
     auto dt_loc = glGetUniformLocation(compute_program,
         "parameters.delta_time");
@@ -209,13 +207,12 @@ void ParticleSource::update_buffer_sizes() {
     life_buffer.clear();
 
     for (int i = 0; i < number_of_particles; i++) {
-        position_buffer.push_back(glm::vec3(0.0));
+        position_buffer.push_back(glm::vec4(0.0, 0.0, 0.0, 1.0));
         life_buffer.push_back(0.0);
         particles.push_back(Particle {
-            glm::vec3(0.0),
+            glm::vec4(0.0, 0.0, 0.0, 1.0),
             initial_velocity,
             initial_acceleration,
-            color,
             0.0
         });
     }
@@ -238,11 +235,7 @@ void ParticleSource::update_buffer_sizes() {
 }
 
 void ParticleSource::generate_gpu_compute() {
-    int work_grp_size[3];
-    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &work_grp_size[0]);
-    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &work_grp_size[1]);
-    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &work_grp_size[2]);
-    work_x = work_grp_size[0];
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &work_x);
     
     GLuint compute_shader = glCreateShader(GL_COMPUTE_SHADER);
     std::string shader_source = 
@@ -272,7 +265,7 @@ void ParticleSource::bind_buffers() {
     glBindBuffer(GL_ARRAY_BUFFER, offset_bo);
     glBufferSubData(GL_ARRAY_BUFFER, 0,
         number_of_particles * sizeof(glm::vec3), position_buffer.data());
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, life_bo);
@@ -296,17 +289,18 @@ float ParticleSource::random_throw() {
     return (random_uniform(1.0) * 2.0) - 1.0;
 }
 
-glm::vec3 ParticleSource::spawn_position() {
+glm::vec4 ParticleSource::spawn_position() {
     float r = random_uniform(emission_radius);
     float theta = random_uniform(2.0 * M_PI);
     float phi = random_uniform(M_PI);
     return spherical_to_xyz(r, theta, phi);
 }
 
-glm::vec3 ParticleSource::spherical_to_xyz(float r, float theta, float phi) {
-    return glm::vec3(
+glm::vec4 ParticleSource::spherical_to_xyz(float r, float theta, float phi) {
+    return glm::vec4(
         r * sinf(theta) * sinf(phi),
         r * sinf(theta) * cosf(phi),
-        r * cosf(theta)
+        r * cosf(theta),
+        1.0
     );
 }

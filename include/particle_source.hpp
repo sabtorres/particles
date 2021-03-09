@@ -6,10 +6,9 @@
 #include <texture.hpp>
 
 struct Particle {
-    glm::vec3 position;
-    glm::vec3 velocity;
-    glm::vec3 acceleration;
-    glm::vec4 color;
+    glm::vec4 position;
+    glm::vec4 velocity;
+    glm::vec4 acceleration;
     float life;
 };
 
@@ -25,7 +24,7 @@ struct ParticleSource {
     int work_x;
 
     std::vector<Particle> particles;
-    std::vector<glm::vec3> position_buffer;
+    std::vector<glm::vec4> position_buffer;
     std::vector<float> life_buffer;
 
     glm::vec3 position;
@@ -41,11 +40,10 @@ struct ParticleSource {
     int particle_index;
     int particles_left;
 
-    glm::vec3 initial_velocity;
+    glm::vec4 initial_velocity;
     float velocity_randomness;
-    glm::vec3 initial_acceleration;
+    glm::vec4 initial_acceleration;
     float acceleration_randomness;
-    glm::vec4 color;
 
     ParticleSource();
     void cleanup();
@@ -61,6 +59,6 @@ struct ParticleSource {
 
     float random_uniform(float scale);
     float random_throw();
-    glm::vec3 spawn_position();
-    glm::vec3 spherical_to_xyz(float r, float theta, float phi);
+    glm::vec4 spawn_position();
+    glm::vec4 spherical_to_xyz(float r, float theta, float phi);
 };
