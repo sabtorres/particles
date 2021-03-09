@@ -24,7 +24,7 @@ struct Particle {
     float life;
 };
 
-layout (binding = 1) coherent buffer Particles {
+layout (std430, binding = 1) coherent buffer Particles {
     Particle p[];
 } particles;
 

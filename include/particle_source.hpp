@@ -23,8 +23,6 @@ struct ParticleSource {
     GLuint compute_program;
     GLuint ssbo;
     int work_x;
-    int work_y;
-    int work_z;
 
     std::vector<Particle> particles;
     std::vector<glm::vec3> position_buffer;

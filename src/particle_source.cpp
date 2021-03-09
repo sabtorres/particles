@@ -3,6 +3,8 @@
 #include <ctime>
 #include <random>
 #include <cmath>
+#include <cstring>
+#include <cstdlib>
 
 #define CLAMP(x) x >= 0.0 ? 1.0 : 0.0;
 const float TEST_RANDOMNESS = 0.9;
@@ -139,7 +141,7 @@ void ParticleSource::update_gpu(double delta_time) {
         + particles_left * explosiveness);
 
     send_uniform_struct(delta_time, new_particles);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo);
     
     if (cycle_timer < 0) {
         cycle_timer = cycle;
@@ -152,10 +154,13 @@ void ParticleSource::update_gpu(double delta_time) {
     glDispatchCompute(work_x, 1, 1);
     glMemoryBarrier(GL_UNIFORM_BARRIER_BIT);
 
+    void* ptr = glMapNamedBuffer(ssbo, GL_READ_ONLY);
+    memcpy(particles.data(), ptr, sizeof(Particle) * number_of_particles);
     for (int i = 0; i < number_of_particles; i++) {
         position_buffer[i] = particles[i].position;
         life_buffer[i] = particles[i].life;
     }
+    glUnmapNamedBuffer(ssbo);
 
     glUseProgram(0);
 }
@@ -225,9 +230,9 @@ void ParticleSource::update_buffer_sizes() {
     glBufferData(GL_ARRAY_BUFFER, number_of_particles
         * sizeof(float), life_buffer.data(), GL_DYNAMIC_DRAW);
     
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo);
     glBufferData(GL_SHADER_STORAGE_BUFFER, number_of_particles
-        * sizeof(Particle), particles.data(), GL_DYNAMIC_DRAW);
+        * sizeof(Particle), particles.data(), GL_DYNAMIC_COPY);
 
     glBindVertexArray(0);
 }
@@ -238,8 +243,6 @@ void ParticleSource::generate_gpu_compute() {
     glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &work_grp_size[1]);
     glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &work_grp_size[2]);
     work_x = work_grp_size[0];
-    work_y = work_grp_size[1];
-    work_z = work_grp_size[2];
     
     GLuint compute_shader = glCreateShader(GL_COMPUTE_SHADER);
     std::string shader_source = 
