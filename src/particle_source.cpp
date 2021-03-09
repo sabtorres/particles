@@ -128,6 +128,7 @@ void ParticleSource::update_gpu(double delta_time) {
     glUseProgram(compute_program);
 
     double previous_timer = cycle_timer;
+    cycle_timer -= delta_time;
     float previous_factor = floor((previous_timer / cycle)
         * number_of_particles);
     float cycle_factor = floor((cycle_timer / cycle) 
@@ -137,8 +138,8 @@ void ParticleSource::update_gpu(double delta_time) {
 
     send_uniform_struct(delta_time, new_particles);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, number_of_particles
-        * sizeof(Particle), particles.data(), GL_DYNAMIC_READ);
+    // glBufferData(GL_SHADER_STORAGE_BUFFER, number_of_particles
+    //     * sizeof(Particle), particles.data(), GL_DYNAMIC_READ);
     // glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0,
     //     number_of_particles * sizeof(Particle), particles.data());
 
@@ -160,7 +161,7 @@ void ParticleSource::update_gpu(double delta_time) {
     }
     glUnmapNamedBuffer(ssbo);
 
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
     glUseProgram(0);
 }
 

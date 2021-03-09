@@ -1,6 +1,7 @@
 #version 450
 
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+layout (std430) buffer;
 
 layout (binding = 0) uniform Parameters {
     int number_of_particles;
@@ -22,9 +23,10 @@ struct Particle {
     vec4 velocity;
     vec4 acceleration;
     float life;
+    // vec3 padding;
 };
 
-layout (std430, binding = 1) buffer Particles {
+layout (binding = 1) buffer Particles {
     Particle all_particles[];
 } particles;
 
@@ -33,7 +35,7 @@ void main() {
 
     float velocity_length = parameters.initial_velocity.length();
     float acceleration_length = parameters.initial_acceleration.length();
-    uint index = gl_GlobalInvocationID.x % parameters.number_of_particles;
+    uint index = gl_GlobalInvocationID.x;
     Particle p = particles.all_particles[index];
 
     if (index >= parameters.particle_index && index < next_index) {
