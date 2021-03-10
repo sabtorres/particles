@@ -9,6 +9,6 @@ struct Menu {
     ImVec4 clear_color;
 
     Menu(GLFWwindow* window);
-    void render(ParticleSource& source);
+    void render(ParticleSource& source, double delta_time);
     void cleanup();
 };

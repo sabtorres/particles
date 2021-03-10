@@ -12,12 +12,13 @@ Menu::Menu(GLFWwindow* window) {
     show_demo_window = true;
 }
 
-void Menu::render(ParticleSource& source) {
+void Menu::render(ParticleSource& source, double delta_time) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     ImGui::Begin("Menu");
     if(show_demo_window) {
+        ImGui::Text("seconds per frame: %f", delta_time);
         ImGui::Checkbox("GPU compute", &source.mode_gpu);
 
         ImGui::SliderFloat("Cycle",

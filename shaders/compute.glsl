@@ -3,21 +3,18 @@
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 layout (std430) buffer;
 
-layout (binding = 2) uniform Parameters {
-    int number_of_particles;
-    float cycle;
-    float explosiveness;
-    float emission_radius;
-    vec4 initial_velocity;
-    float velocity_randomness;
-    vec4 initial_acceleration;
-    float acceleration_randomness;
+uniform int number_of_particles;
+uniform float cycle;
+uniform float explosiveness;
+uniform float emission_radius;
+uniform vec4 initial_velocity;
+uniform float velocity_randomness;
+uniform vec4 initial_acceleration;
+uniform float acceleration_randomness;
 
-    float delta_time;
-    int particle_index;
-    int new_particles;
-    vec2 padding;
-} parameters;
+uniform float delta_time;
+uniform int particle_index;
+uniform int new_particles;
 
 struct Particle {
     vec4 position;
@@ -27,29 +24,29 @@ struct Particle {
     vec3 padding;
 };
 
-layout (binding = 3) buffer Particles {
+layout (binding = 0) buffer Particles {
     Particle all_particles[];
 } particles;
 
 void main() {
-    int next_index = parameters.particle_index + parameters.new_particles;
+    int next_index = particle_index + new_particles;
 
-    float velocity_length = parameters.initial_velocity.length();
-    float acceleration_length = parameters.initial_acceleration.length();
-    uint index = gl_GlobalInvocationID.x;
+    float velocity_length = initial_velocity.length();
+    float acceleration_length = initial_acceleration.length();
+    uint index = gl_GlobalInvocationID.x % number_of_particles;
     Particle p = particles.all_particles[index];
 
-    if (index >= parameters.particle_index && index < next_index) {
-        p.life = parameters.cycle;
+    if (index >= particle_index && index < next_index) {
+        p.life = cycle;
         p.position = vec4(0.0, 0.0, 0.0, 1.0);
-        p.velocity = parameters.initial_velocity;
-        p.acceleration = parameters.initial_acceleration;
+        p.velocity = initial_velocity;
+        p.acceleration = initial_acceleration;
     }
     
     if (p.life > 0.0) {
-        p.life -= parameters.delta_time;
-        p.velocity += p.acceleration * parameters.delta_time;
-        p.position += p.velocity * parameters.delta_time;
+        p.life -= delta_time;
+        p.velocity += p.acceleration * delta_time;
+        p.position += p.velocity * delta_time;
     }
     else {
         p.life = 0.0;

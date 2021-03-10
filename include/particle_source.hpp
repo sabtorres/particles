@@ -25,8 +25,6 @@ struct ParticleSource {
     int work_x;
 
     std::vector<Particle> particles;
-    std::vector<glm::vec4> position_buffer;
-    std::vector<float> life_buffer;
 
     glm::vec3 position;
     glm::vec3 rotation;

@@ -14,8 +14,6 @@ const uint WINDOW_HEIGHT = 1080;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 int main() {
-    printf("Welcome to particles!\n");
-
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
@@ -57,13 +55,12 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         source.update(delta_time);
         render(source, shader);
-        menu.render(source);
+        menu.render(source, delta_time);
         glfwSwapBuffers(window);
 
         auto end_time = std::chrono::high_resolution_clock::now();
         delta_time = std::chrono::duration<double>(
             (end_time - begin_time)).count();
-        printf("ms/frame: %f\n", delta_time);
         begin_time = std::chrono::high_resolution_clock::now();
     }
     

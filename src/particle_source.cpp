@@ -28,8 +28,6 @@ ParticleSource::ParticleSource() {
     acceleration_randomness = TEST_RANDOMNESS;
 
     glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &offset_bo);
-    glGenBuffers(1, &life_bo);
     glGenBuffers(1, &ssbo);
     update_buffer_sizes();
     
@@ -55,8 +53,6 @@ ParticleSource::ParticleSource() {
 void ParticleSource::cleanup() {
     glDeleteProgram(compute_program);
     glDeleteTextures(1, &this->texture_buffer);
-    glDeleteBuffers(1, &this->offset_bo);
-    glDeleteBuffers(1, &this->life_bo);
     glDeleteBuffers(1, &this->ssbo);
     glDeleteVertexArrays(1, &this->vao);
 }
@@ -113,9 +109,6 @@ void ParticleSource::update_cpu(double delta_time) {
             particles[i].velocity = glm::vec4(0.0, 0.0, 0.0, 0.0);
             particles[i].acceleration = glm::vec4(0.0, 0.0, 0.0, 0.0);
         }
-
-        position_buffer[i] = particles[i].position;
-        life_buffer[i] = particles[i].life;
     }
 
     if (cycle_timer < 0) {
@@ -137,7 +130,7 @@ void ParticleSource::update_gpu(double delta_time) {
 
     glUseProgram(compute_program);
     send_uniform_struct(delta_time, new_particles);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
 
     glDispatchCompute((number_of_particles / LOCAL_GROUPS) + 1, 1, 1);
     if (cycle_timer < 0.0) {
@@ -149,67 +142,55 @@ void ParticleSource::update_gpu(double delta_time) {
     particle_index = next_index % number_of_particles;
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
-    Particle* ptr = (Particle*) glMapNamedBuffer(ssbo, GL_READ_ONLY);
-    memcpy(particles.data(), ptr, sizeof(Particle) * number_of_particles);
-    for (int i = 0; i < number_of_particles; i++) {
-        position_buffer[i] = particles[i].position;
-        life_buffer[i] = particles[i].life;
-    }
-    glUnmapNamedBuffer(ssbo);
-
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, 0);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
     glUseProgram(0);
 }
 
 void ParticleSource::send_uniform_struct(double delta_time, int new_particles) {
     auto nop_loc = glGetUniformLocation(compute_program,
-        "parameters.number_of_particles");
+        "number_of_particles");
     glUniform1i(nop_loc, number_of_particles);
     auto cycle_loc = glGetUniformLocation(compute_program,
-        "parameters.cycle");
+        "cycle");
     glUniform1f(cycle_loc, cycle);
     auto explosiveness_loc = glGetUniformLocation(compute_program,
-        "parameters.explosiveness");
+        "explosiveness");
     glUniform1f(explosiveness_loc, explosiveness);
     auto radius_loc = glGetUniformLocation(compute_program,
-        "parameters.emission_radius");
+        "emission_radius");
     glUniform1f(radius_loc, emission_radius);
 
     auto vr_loc = glGetUniformLocation(compute_program,
-        "parameters.velocity_randomness");
+        "velocity_randomness");
     glUniform1f(vr_loc, velocity_randomness);
     auto ar_loc = glGetUniformLocation(compute_program,
-        "parameters.acceleration_randomness");
+        "acceleration_randomness");
     glUniform1f(ar_loc, acceleration_randomness);
 
     auto iv_loc = glGetUniformLocation(compute_program,
-        "parameters.initial_velocity");
+        "initial_velocity");
     glUniform4f(iv_loc, initial_velocity.x, initial_velocity.y,
         initial_velocity.z, initial_velocity.w);
     auto ia_loc = glGetUniformLocation(compute_program,
-        "parameters.initial_acceleration");
+        "initial_acceleration");
     glUniform4f(ia_loc, initial_acceleration.x, initial_acceleration.y,
         initial_acceleration.z, initial_acceleration.w);
 
     auto dt_loc = glGetUniformLocation(compute_program,
-        "parameters.delta_time");
+        "delta_time");
     glUniform1f(dt_loc, (float) delta_time);
     auto pi_loc = glGetUniformLocation(compute_program,
-        "parameters.particle_index");
+        "particle_index");
     glUniform1i(pi_loc, particle_index);
     auto np_loc = glGetUniformLocation(compute_program,
-        "parameters.new_particles");
+        "new_particles");
     glUniform1i(np_loc, new_particles);
 }
 
 void ParticleSource::update_buffer_sizes() {
     particles.clear();
-    position_buffer.clear();
-    life_buffer.clear();
 
     for (int i = 0; i < number_of_particles; i++) {
-        position_buffer.push_back(glm::vec4(0.0, 0.0, 0.0, 1.0));
-        life_buffer.push_back(0.0);
         particles.push_back(Particle {
             glm::vec4(0.0, 0.0, 0.0, 1.0),
             initial_velocity,
@@ -220,19 +201,9 @@ void ParticleSource::update_buffer_sizes() {
     }
 
     glBindVertexArray(vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, offset_bo);
-    glBufferData(GL_ARRAY_BUFFER, number_of_particles 
-        * sizeof(float) * 4, position_buffer.data(), GL_DYNAMIC_DRAW);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, life_bo);
+    glBindBuffer(GL_ARRAY_BUFFER, ssbo);
     glBufferData(GL_ARRAY_BUFFER, number_of_particles
-        * sizeof(float), life_buffer.data(), GL_DYNAMIC_DRAW);
-    
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, number_of_particles
-        * sizeof(Particle), particles.data(), GL_DYNAMIC_READ);
-
+        * sizeof(Particle), particles.data(), GL_DYNAMIC_DRAW);
     glBindVertexArray(0);
 }
 
@@ -264,16 +235,15 @@ void ParticleSource::bind_buffers() {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_buffer);
 
-    glBindBuffer(GL_ARRAY_BUFFER, offset_bo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0,
-        number_of_particles * sizeof(float) * 4, position_buffer.data());
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glBindBuffer(GL_ARRAY_BUFFER, ssbo);
+    if (!mode_gpu) {
+        glBufferSubData(GL_ARRAY_BUFFER, 0,
+            number_of_particles * sizeof(Particle), particles.data());
+    }
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), nullptr);
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(Particle),
+        (GLvoid*) 48);
     glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, life_bo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0,
-        number_of_particles * sizeof(float), life_buffer.data());
-    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(1);
 }
 
