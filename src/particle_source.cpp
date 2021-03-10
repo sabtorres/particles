@@ -65,7 +65,7 @@ void ParticleSource::update(double delta_time) {
     if(!mode_gpu) {
         update_cpu(delta_time);
     }
-    else {
+    else if (mode_gpu) {
         update_gpu(delta_time);
     }
 }
@@ -126,8 +126,6 @@ void ParticleSource::update_cpu(double delta_time) {
 }
 
 void ParticleSource::update_gpu(double delta_time) {
-    glUseProgram(compute_program);
-
     double previous_timer = cycle_timer;
     cycle_timer -= delta_time;
     float previous_factor = floor((previous_timer / cycle)
@@ -137,13 +135,12 @@ void ParticleSource::update_gpu(double delta_time) {
     int new_particles = (int) (previous_factor - cycle_factor
         + particles_left * explosiveness);
 
+    glUseProgram(compute_program);
     send_uniform_struct(delta_time, new_particles);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo);
-    glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0,
-        number_of_particles * sizeof(Particle), particles.data());
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
 
     glDispatchCompute((number_of_particles / LOCAL_GROUPS) + 1, 1, 1);
-    if (cycle_timer < 0) {
+    if (cycle_timer < 0.0) {
         cycle_timer = cycle;
         particles_left = number_of_particles;
     }
@@ -152,7 +149,7 @@ void ParticleSource::update_gpu(double delta_time) {
     particle_index = next_index % number_of_particles;
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
-    void* ptr = glMapNamedBuffer(ssbo, GL_READ_ONLY);
+    Particle* ptr = (Particle*) glMapNamedBuffer(ssbo, GL_READ_ONLY);
     memcpy(particles.data(), ptr, sizeof(Particle) * number_of_particles);
     for (int i = 0; i < number_of_particles; i++) {
         position_buffer[i] = particles[i].position;
@@ -160,7 +157,7 @@ void ParticleSource::update_gpu(double delta_time) {
     }
     glUnmapNamedBuffer(ssbo);
 
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, 0);
     glUseProgram(0);
 }
 
@@ -232,9 +229,9 @@ void ParticleSource::update_buffer_sizes() {
     glBufferData(GL_ARRAY_BUFFER, number_of_particles
         * sizeof(float), life_buffer.data(), GL_DYNAMIC_DRAW);
     
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
     glBufferData(GL_SHADER_STORAGE_BUFFER, number_of_particles
-        * sizeof(Particle), particles.data(), GL_DYNAMIC_COPY);
+        * sizeof(Particle), particles.data(), GL_DYNAMIC_READ);
 
     glBindVertexArray(0);
 }

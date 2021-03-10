@@ -3,7 +3,7 @@
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 layout (std430) buffer;
 
-layout (binding = 0) uniform Parameters {
+layout (binding = 2) uniform Parameters {
     int number_of_particles;
     float cycle;
     float explosiveness;
@@ -27,7 +27,7 @@ struct Particle {
     vec3 padding;
 };
 
-layout (binding = 1) buffer Particles {
+layout (binding = 3) buffer Particles {
     Particle all_particles[];
 } particles;
 
