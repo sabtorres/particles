@@ -21,7 +21,6 @@ my goal is to build a particle simulation system that can be customizable by art
 
 - Bezier curves to determine particle path
 
-- pre-calculated noise buffers for randomness (will only be done if further optimization is necessary)
 
 # requirements for building
 

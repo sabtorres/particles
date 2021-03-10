@@ -32,18 +32,10 @@ ParticleSource::ParticleSource() {
     update_buffer_sizes();
     
     glBindVertexArray(vao);
-    texture = Texture();
-    glGenTextures(1, &texture_buffer);
-	glBindTexture(GL_TEXTURE_2D, texture_buffer);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width,
-        texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data.data());
+    texture = Texture("../resources/tex1.png");
+    setup_texture(texture, texture_buffer, GL_RGBA, GL_TEXTURE_2D);
+    noise = Texture();
+    setup_texture(noise, noise_buffer, GL_RED, GL_TEXTURE_2D);
     
     generate_gpu_compute();
     
@@ -140,13 +132,16 @@ void ParticleSource::update_gpu(double delta_time) {
     particles_left -= new_particles;
     int next_index = particle_index + new_particles;
     particle_index = next_index % number_of_particles;
-    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+    glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
 
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
     glUseProgram(0);
 }
 
 void ParticleSource::send_uniform_struct(double delta_time, int new_particles) {
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, noise_buffer);
+    
     auto nop_loc = glGetUniformLocation(compute_program,
         "number_of_particles");
     glUniform1i(nop_loc, number_of_particles);
@@ -185,6 +180,11 @@ void ParticleSource::send_uniform_struct(double delta_time, int new_particles) {
     auto np_loc = glGetUniformLocation(compute_program,
         "new_particles");
     glUniform1i(np_loc, new_particles);
+
+    auto ys_loc = glGetUniformLocation(compute_program,
+        "y_sampler");
+    glUniform4f(ys_loc, random_uniform(1.0), random_uniform(1.0),
+        random_uniform(1.0), random_uniform(1.0));
 }
 
 void ParticleSource::update_buffer_sizes() {
@@ -227,6 +227,21 @@ void ParticleSource::generate_gpu_compute() {
 
     glDetachShader(compute_program, compute_shader);
     glDeleteShader(compute_shader);
+}
+
+void ParticleSource::setup_texture(const Texture& texture,
+    GLuint& buffer, GLint flag, GLint dimension) {
+    glGenTextures(1, &buffer);
+	glBindTexture(dimension, buffer);
+
+	glTexParameteri(dimension, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(dimension, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameterf(dimension, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(dimension, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexImage2D(dimension, 0, GL_RGBA, texture.width,
+        texture.height, 0, flag, GL_UNSIGNED_BYTE, texture.data.data());
 }
 
 void ParticleSource::bind_buffers() {

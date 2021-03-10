@@ -15,11 +15,10 @@ struct Particle {
 
 struct ParticleSource {
     GLuint vao;
-    GLuint offset_bo;
-    GLuint uv_bo;
-    GLuint life_bo;
     Texture texture;
+    Texture noise;
     GLuint texture_buffer;
+    GLuint noise_buffer;
     GLuint compute_program;
     GLuint ssbo;
     int work_x;
@@ -52,6 +51,8 @@ struct ParticleSource {
     void send_uniform_struct(double delta_time, int new_particles);
     
     void update_buffer_sizes();
+    void setup_texture(const Texture& texture,
+        GLuint& buffer, GLint flag, GLint dimension);
     void generate_gpu_compute();
     void bind_buffers();
     void draw();
