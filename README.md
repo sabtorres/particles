@@ -7,8 +7,6 @@ my goal is to build a particle simulation system that can be customizable by art
 
 # to-do list
 
-- GPU particle support (on the way)
-
 - GUI to change the particle texture
 
 - support for multiple textures
@@ -20,7 +18,6 @@ my goal is to build a particle simulation system that can be customizable by art
 - SPIR-V shaders (requires updating to GL 4.6)
 
 - Bezier curves to determine particle path
-
 
 # requirements for building
 

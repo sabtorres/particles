@@ -71,8 +71,8 @@ void ParticleSource::update_cpu(double delta_time) {
     particles_left -= new_particles;
     int next_index = particle_index + new_particles;
     
-    float velocity_length = glm::length(initial_velocity);
-    float acceleration_length = glm::length(initial_acceleration);
+    float velocity_length = sqrt(initial_velocity.length());
+    float acceleration_length = sqrt(initial_acceleration.length());
 
     for (int i = particle_index; i < next_index; i++) {
         particles[i % number_of_particles].life = cycle;
@@ -229,7 +229,7 @@ void ParticleSource::generate_gpu_compute() {
     glDeleteShader(compute_shader);
 }
 
-void ParticleSource::setup_texture(const Texture& texture,
+void ParticleSource::setup_texture(const Texture& m_texture,
     GLuint& buffer, GLint flag, GLint dimension) {
     glGenTextures(1, &buffer);
 	glBindTexture(dimension, buffer);
@@ -240,8 +240,8 @@ void ParticleSource::setup_texture(const Texture& texture,
 	glTexParameterf(dimension, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(dimension, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexImage2D(dimension, 0, GL_RGBA, texture.width,
-        texture.height, 0, flag, GL_UNSIGNED_BYTE, texture.data.data());
+	glTexImage2D(dimension, 0, flag, m_texture.width,
+        m_texture.height, 0, flag, GL_UNSIGNED_BYTE, m_texture.data.data());
 }
 
 void ParticleSource::bind_buffers() {

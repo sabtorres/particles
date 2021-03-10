@@ -4,6 +4,7 @@ layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 layout (std430) buffer;
 
 const float M_PI = 3.1415;
+const int HASH = 16;
 
 uniform int number_of_particles;
 uniform float cycle;
@@ -25,14 +26,13 @@ struct Particle {
     vec4 velocity;
     vec4 acceleration;
     float life;
-    vec3 padding;
 };
 
 layout (binding = 0) buffer Particles {
     Particle all_particles[];
 } particles;
 
-layout (location = 1) uniform sampler2D noise;
+layout (binding = 1) uniform sampler2D noise;
 
 vec4 spherical_to_xyz(float r, float theta, float phi) {
     return vec4(
@@ -64,8 +64,8 @@ vec4 spawn_position(int index) {
 void main() {
     int next_index = particle_index + new_particles;
 
-    float velocity_length = initial_velocity.length();
-    float acceleration_length = initial_acceleration.length();
+    float velocity_length = sqrt(initial_velocity.length());
+    float acceleration_length = sqrt(initial_acceleration.length());
     int index = int(gl_GlobalInvocationID.x);
     Particle p = particles.all_particles[index];
 
@@ -73,13 +73,13 @@ void main() {
         p.life = cycle;
         p.position = spawn_position(index);
         p.velocity = initial_velocity * (1.0 - velocity_randomness)
-            + vec4(random_throw(index), random_throw(index - 1),
-                random_throw(index + 1), 1.0)
-            * velocity_length;
+            + vec4(random_throw(index), random_throw(index - (index % HASH)),
+                random_throw(index + (index % HASH)), 0.0)
+            * velocity_length * velocity_randomness;
         p.acceleration = initial_acceleration * (1.0 - acceleration_randomness)
-            + vec4(random_throw(index), random_throw(index - 1),
-                random_throw(index + 1), 1.0)
-            * acceleration_length;
+            + vec4(random_throw(index), random_throw(index - (index % HASH)),
+                random_throw(index + (index % HASH)), 0.0)
+            * acceleration_length * acceleration_randomness;
     }
     
     if (p.life > 0.0) {

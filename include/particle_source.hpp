@@ -51,7 +51,7 @@ struct ParticleSource {
     void send_uniform_struct(double delta_time, int new_particles);
     
     void update_buffer_sizes();
-    void setup_texture(const Texture& texture,
+    void setup_texture(const Texture& m_texture,
         GLuint& buffer, GLint flag, GLint dimension);
     void generate_gpu_compute();
     void bind_buffers();
