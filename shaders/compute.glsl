@@ -61,8 +61,8 @@ vec4 spawn_position(int index) {
     float coordinate0 = sin(float(index));
     float coordinate1 = cos(float(index));
     float coordinate2 = tan(float(index));
-    float r = random_uniform(vec2(coordinate0, y_sampler.y), emission_radius);
-    float theta = random_uniform(vec2(coordinate0, y_sampler.z),
+    float r = random_uniform(vec2(coordinate2, y_sampler.y), emission_radius);
+    float theta = random_uniform(vec2(coordinate1, y_sampler.z),
         2.0 * M_PI);
     float phi = random_uniform(vec2(coordinate0, y_sampler.w), M_PI);
     return spherical_to_xyz(r, theta, phi);
