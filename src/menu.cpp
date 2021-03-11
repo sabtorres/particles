@@ -51,7 +51,7 @@ void Menu::render(ParticleSource& source, double delta_time) {
             source.update_buffer_sizes();
         }
     ImGui::SliderFloat("Point size",
-        &source.point_size, 1.0f, 100.0f);
+        &source.point_size, 1.0f, 256.0f);
     ImGui::SliderFloat("Explosiveness",
         &source.explosiveness, 0.0f, 1.0f);
     ImGui::SliderFloat("Emission radius",

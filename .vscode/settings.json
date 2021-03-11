@@ -50,6 +50,10 @@
         "chrono": "cpp",
         "cstring": "cpp",
         "ctime": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "iomanip": "cpp"
     }
 }

@@ -13,13 +13,11 @@ my goal is to build a particle simulation system that can be customizable by art
 
 - able to customize particle size, explosiveness, emission radius, initial velocity, acceleration, cycle time and randomness factors
 
-- able to simulate up to 9999 particles (tested on a Ryzen 7 2700 GPU, 3.2 Ghz, and an AMD RX 460 GPU, with no notable variation on miliseconds per frame)
+- able to simulate up to 9999 particles (tested on a Ryzen 7 2700 GPU, 3.2 Ghz, and an AMD RX 460 GPU, with no notable variation on seconds per frame. notice that very large point sizes can cause delay due to the amount of alpha blending, i may attempt to fix this in the future)
 
 # to-do list
 
 - camera input and grid for better 3D view
-
-- use geometry shaders instead of GL_POINTS (very large point sizes are causing frame delays and using GL_POINTS on modern hardware isn't the best solution)
 
 # maybe to-dos (these features are lesser priority and may or may not go to the list above)
 

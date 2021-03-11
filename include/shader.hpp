@@ -5,10 +5,12 @@
 
 const std::string VERTEX_FILE = "../shaders/vertex.glsl";
 const std::string FRAGMENT_FILE = "../shaders/fragment.glsl";
+const std::string GEOMETRY_FILE = "../shaders/geometry.glsl";
 
 struct Shader {
     GLuint program;
     GLuint vertex_shader;
+    GLuint geometry_shader;
     GLuint fragment_shader;
 
     Shader();

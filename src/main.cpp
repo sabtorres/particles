@@ -54,7 +54,7 @@ int main() {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         source.update(delta_time);
-        render(source, shader);
+        render(source, shader, WINDOW_WIDTH, WINDOW_HEIGHT);
         menu.render(source, delta_time);
         glfwSwapBuffers(window);
 

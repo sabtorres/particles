@@ -3,4 +3,4 @@
 #include <particle_source.hpp>
 #include <shader.hpp>
 
-void render(ParticleSource& source, const Shader& shader);
+void render(ParticleSource& source, const Shader& shader, uint width, uint height);

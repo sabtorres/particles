@@ -6,7 +6,7 @@
 #include <cstdlib>
 
 const float TEST_RANDOMNESS = 0.9;
-const int LOCAL_GROUPS = 64;
+const int LOCAL_GROUPS = 256;
 
 ParticleSource::ParticleSource() {
     position = glm::vec3(0.0);
@@ -263,7 +263,6 @@ void ParticleSource::bind_buffers() {
 }
 
 void ParticleSource::draw() {
-    glPointSize(point_size);
     glDrawArrays(GL_POINTS, 0, number_of_particles);
 }
 

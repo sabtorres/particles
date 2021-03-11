@@ -2,7 +2,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-void render(ParticleSource& source, const Shader& shader) {
+void render(ParticleSource& source, const Shader& shader, uint width, uint height) {
     auto translate = glm::identity<glm::mat4>();
     auto rotation = glm::identity<glm::mat4>();
     auto scale = glm::identity<glm::mat4>();
@@ -31,6 +31,15 @@ void render(ParticleSource& source, const Shader& shader) {
 
     auto cycle_loc = glGetUniformLocation(shader.program, "cycle");
     glUniform1f(cycle_loc, source.cycle);
+
+    auto size_loc = glGetUniformLocation(shader.program, "point_size");
+    glUniform1f(size_loc, source.point_size);
+
+    auto width_loc = glGetUniformLocation(shader.program, "resolution_x");
+    glUniform1f(width_loc, width);
+
+    auto height_loc = glGetUniformLocation(shader.program, "resolution_y");
+    glUniform1f(height_loc, height);
 
     source.bind_buffers();
     source.draw();
