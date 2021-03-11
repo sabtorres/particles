@@ -5,6 +5,16 @@ Real time particle system using OpenGL 4 and C++
  
 my goal is to build a particle simulation system that can be customizable by artists and designers, and easily extended by a graphics programmer. this is free software, without warranties.
 
+# features
+
+- GPU compute support for particle dynamics
+
+- user is able to put a custom texture
+
+- able to customize particle size, explosiveness, emission radius, initial velocity, acceleration, cycle time and randomness factors
+
+- able to simulate up to 9999 particles (tested on a Ryzen 7 2700 GPU, 3.2 Ghz, and an AMD RX 460 GPU, with no notable variation on miliseconds per frame)
+
 # to-do list
 
 - camera input and grid for better 3D view
@@ -33,7 +43,7 @@ my goal is to build a particle simulation system that can be customizable by art
 
 - ninja (or some other meson backend, but i'm only using ninja)
 
-- some C++ compiler
+- some C++ compiler (stdc++11 support)
 
 # how to build
 
@@ -62,6 +72,8 @@ want me to work on this? give it a motivational star.
 these libraries were used in the development and i'd like to thank their authors and contributors for offering these tools:
 
 - imgui
+
+- imgui file dialog (by aiekick)
 
 - glad
 
