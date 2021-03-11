@@ -64,8 +64,8 @@ vec4 spawn_position(int index) {
 void main() {
     int next_index = particle_index + new_particles;
 
-    float velocity_length = sqrt(initial_velocity.length());
-    float acceleration_length = sqrt(initial_acceleration.length());
+    float velocity_length = sqrt(length(initial_velocity));
+    float acceleration_length = sqrt(length(initial_acceleration));
     int index = int(gl_GlobalInvocationID.x);
     Particle p = particles.all_particles[index];
 

@@ -71,8 +71,8 @@ void ParticleSource::update_cpu(double delta_time) {
     particles_left -= new_particles;
     int next_index = particle_index + new_particles;
     
-    float velocity_length = sqrt(initial_velocity.length());
-    float acceleration_length = sqrt(initial_acceleration.length());
+    float velocity_length = sqrt(glm::length(initial_velocity));
+    float acceleration_length = sqrt(glm::length(initial_acceleration));
 
     for (int i = particle_index; i < next_index; i++) {
         particles[i % number_of_particles].life = cycle;
