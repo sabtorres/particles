@@ -4,7 +4,10 @@ layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 layout (std430) buffer;
 
 const float M_PI = 3.1415;
-const int HASH = 16;
+const int HASH1 = 17;
+const int HASH2 = 19;
+const int HASH3 = 23;
+const int HASH4 = 29;
 
 uniform int number_of_particles;
 uniform float cycle;
@@ -48,12 +51,16 @@ float random_uniform(vec2 coordinate, float scale) {
 }
 
 float random_throw(int index) {
-    float coordinate0 = float(index) / float(number_of_particles);
+    float coordinate0 = sin(float(index));
+    float coordinate1 = cos(float(index));
+    float coordinate2 = tan(float(index));
     return (random_uniform(vec2(coordinate0, y_sampler.x), 1.0) * 2.0) - 1.0;
 }
 
 vec4 spawn_position(int index) {
-    float coordinate0 = float(index) / float(number_of_particles);
+    float coordinate0 = sin(float(index));
+    float coordinate1 = cos(float(index));
+    float coordinate2 = tan(float(index));
     float r = random_uniform(vec2(coordinate0, y_sampler.y), emission_radius);
     float theta = random_uniform(vec2(coordinate0, y_sampler.z),
         2.0 * M_PI);
@@ -73,12 +80,12 @@ void main() {
         p.life = cycle;
         p.position = spawn_position(index);
         p.velocity = initial_velocity * (1.0 - velocity_randomness)
-            + vec4(random_throw(index), random_throw(index - (index % HASH)),
-                random_throw(index + (index % HASH)), 0.0)
+            + vec4(random_throw(index), random_throw(index % HASH1),
+                random_throw(index % HASH2), 0.0)
             * velocity_length * velocity_randomness;
         p.acceleration = initial_acceleration * (1.0 - acceleration_randomness)
-            + vec4(random_throw(index), random_throw(index - (index % HASH)),
-                random_throw(index + (index % HASH)), 0.0)
+            + vec4(random_throw(index), random_throw(index % HASH3),
+                random_throw(index % HASH4), 0.0)
             * acceleration_length * acceleration_randomness;
     }
     
