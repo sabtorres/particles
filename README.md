@@ -9,9 +9,11 @@ my goal is to build a particle simulation system that can be customizable by art
 
 - camera input and grid for better 3D view
 
-- support for multiple textures
+- use geometry shaders instead of GL_POINTS (very large point sizes are causing frame delays and using GL_POINTS on modern hardware isn't the best solution)
 
 # maybe to-dos (these features are lesser priority and may or may not go to the list above)
+
+- support for multiple textures
 
 - SPIR-V shaders (requires updating to GL 4.6)
 
