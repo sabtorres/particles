@@ -7,13 +7,11 @@ my goal is to build a particle simulation system that can be customizable by art
 
 # to-do list
 
-- GUI to change the particle texture
+- camera input and grid for better 3D view
 
 - support for multiple textures
 
 # maybe to-dos (these features are lesser priority and may or may not go to the list above)
-
-- camera input and grid for better 3D view
 
 - SPIR-V shaders (requires updating to GL 4.6)
 

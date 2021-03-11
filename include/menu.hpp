@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 
 struct Menu {
-    bool show_demo_window;
+    bool show_texture_window;
     ImVec4 clear_color;
 
     Menu(GLFWwindow* window);

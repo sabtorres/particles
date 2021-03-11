@@ -21,6 +21,8 @@ sources = [
     third_party_pfx + 'imgui/imgui_widgets.cpp',
     third_party_pfx + 'imgui/imgui_tables.cpp',
     third_party_pfx + 'imgui/imgui_draw.cpp',
+    third_party_pfx + 'imguifiledialog/ImGuiFileDialog.cpp',
+    third_party_pfx + 'imguifiledialog/CustomFont.cpp'
 ]
 
 glm = dependency('glm', version : '>=0.9.9')
