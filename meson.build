@@ -1,4 +1,4 @@
-project('particles', 'cpp', default_options : 'std=c++11 -g3')
+project('particles', 'cpp',  default_options : ['cpp_std=c++11'])
 
 cc = meson.get_compiler('cpp')
 incdir = 'include/'
@@ -31,13 +31,17 @@ libdl = cc.find_library('dl')
 glfw = dependency('glfw3')
 
 executable('demo', sources,
-include_directories : [
-    incdir,
-    third_party_pfx
-],
-dependencies : [
-    glm,
-    gl,
-    libdl,
-    glfw
-])
+    include_directories : [
+        incdir,
+        third_party_pfx
+    ],
+    dependencies : [
+        glm,
+        gl,
+        libdl,
+        glfw
+    ],
+    # cpp_args: [ '-ffreestanding', '-static'],
+    # link_args: ['-nostdlib', '-static', '-Wl,--entry=main'],
+    # pie : false
+)

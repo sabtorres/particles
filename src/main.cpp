@@ -10,8 +10,12 @@
 
 const uint WINDOW_WIDTH = 1920;
 const uint WINDOW_HEIGHT = 1080;
+double last_x, last_y;
+Renderer renderer;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void get_camera_input(GLFWwindow* window, double x_pos, double y_pos);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
 int main() {
     glfwInit();
@@ -27,6 +31,9 @@ int main() {
         return -1;
     }
     glfwMakeContextCurrent(window);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwGetCursorPos(window, &last_x, &last_y);
+
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout<<"Failed to initialize GLAD\n";
@@ -46,6 +53,7 @@ int main() {
     Menu menu = Menu(window);
     Shader shader = Shader();
     ParticleSource source = ParticleSource();
+    renderer = Renderer();
 
     // render loop
     double delta_time = 0;
@@ -54,7 +62,7 @@ int main() {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         source.update(delta_time);
-        render(source, shader, WINDOW_WIDTH, WINDOW_HEIGHT);
+        renderer.render(source, shader, WINDOW_WIDTH, WINDOW_HEIGHT);
         menu.render(source, delta_time);
         glfwSwapBuffers(window);
 
@@ -74,4 +82,41 @@ int main() {
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
+}
+
+void get_camera_input(GLFWwindow* window, double x_pos, double y_pos) {
+    float x_offset = x_pos - last_x;
+    float y_offset = last_y - y_pos; 
+    last_x = x_pos;
+    last_y = y_pos;
+
+    float sensitivity = 0.1f;
+    x_offset *= sensitivity;
+    y_offset *= sensitivity;
+
+    renderer.camera_yaw += x_offset;
+    renderer.camera_pitch += y_offset;
+
+    if(renderer.camera_pitch > 89.0f)
+        renderer.camera_pitch = 89.0f;
+    if(renderer.camera_pitch < -89.0f)
+        renderer.camera_pitch = -89.0f;
+
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(renderer.camera_yaw)) * cos(glm::radians(renderer.camera_pitch));
+    direction.y = sin(glm::radians(renderer.camera_pitch));
+    direction.z = sin(glm::radians(renderer.camera_yaw)) * cos(glm::radians(renderer.camera_pitch));
+    renderer.camera_position = glm::normalize(direction);
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetCursorPosCallback(window, get_camera_input);
+    }
+    
+    else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetCursorPosCallback(window, nullptr);
+    }
 }

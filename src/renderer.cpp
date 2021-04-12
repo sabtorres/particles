@@ -1,19 +1,24 @@
 #include <renderer.hpp>
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-void render(ParticleSource& source, const Shader& shader, uint width, uint height) {
-    auto translate = glm::identity<glm::mat4>();
-    auto rotation = glm::identity<glm::mat4>();
-    auto scale = glm::identity<glm::mat4>();
+Renderer::Renderer() {
+    camera_yaw = 0.0;
+    camera_pitch = 0.0;
+    zoom = 3.0;
+    camera_position = glm::vec3(0.0, 0.0, 1.0);
+    camera_target = glm::vec3(0.0, 0.0, 0.0);
+    camera_up = glm::vec3(0.0, 1.0, 0.0);
+}
 
-    auto model_mat = translate * scale * rotation;
+void Renderer::render(ParticleSource& source, const Shader& shader, uint width, uint height) {
+    auto model_mat = glm::identity<glm::mat4>();
 
-    auto camera_eye = glm::vec3(0.0, 0.0, 3.0);
+    auto real_position = camera_position * zoom;
+
     auto view_mat = glm::lookAt(
-        camera_eye,
-        glm::vec3(0.0, 0.0, 0.0),
-        glm::vec3(0.0, 1.0, 0.0)
+        real_position,
+        camera_target,
+        camera_up
     );
 
     auto projection_mat = glm::perspective<float>(45.0, 16.0/9.0, 0.001, 1000);
