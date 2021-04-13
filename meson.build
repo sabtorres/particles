@@ -9,6 +9,7 @@ imgui_pfx = 'src/imgui/'
 sources = [
     pfx + 'main.cpp',
     pfx + 'renderer.cpp',
+    pfx + 'grid.cpp',
     pfx + 'menu.cpp',
     pfx + 'particle_source.cpp',
     pfx + 'shader.cpp',

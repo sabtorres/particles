@@ -13,8 +13,24 @@ Shader::Shader() {
     std::string geometry_shader_source = load_shader_string(GEOMETRY_FILE);
     std::string fragment_shader_source = load_shader_string(FRAGMENT_FILE);
 
+    setup_program(vertex_shader_source, geometry_shader_source, fragment_shader_source);
+}
+
+Shader::Shader(const std::string& vs_file, const std::string& fs_file) {
+    program = glCreateProgram();
+
+    if(program == 0) {
+        std::cerr<<"Couldn't find a valid address in memory to build the program\n";
+    }
+
+    std::string vertex_shader_source = load_shader_string(vs_file);
+    std::string fragment_shader_source = load_shader_string(fs_file);
+
+    setup_program(vertex_shader_source, "", fragment_shader_source);
+}
+
+void Shader::setup_program(const std::string& vertex_shader_source, const std::string& geometry_shader_source, const std::string& fragment_shader_source) {
     vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    geometry_shader = glCreateShader(GL_GEOMETRY_SHADER);
     fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 
     const char* char_pointer_source = vertex_shader_source.c_str();
@@ -24,12 +40,15 @@ Shader::Shader() {
     check_shader_error(vertex_shader, GL_COMPILE_STATUS, false);
     glAttachShader(program, vertex_shader);
 
-    char_pointer_source = geometry_shader_source.c_str();
-    length_pointer = geometry_shader_source.length();
-    glShaderSource(geometry_shader, 1, &char_pointer_source, &length_pointer);
-    glCompileShader(geometry_shader);
-    check_shader_error(geometry_shader, GL_COMPILE_STATUS, false);
-    glAttachShader(program, geometry_shader);
+    if (geometry_shader_source != "") {
+        geometry_shader = glCreateShader(GL_GEOMETRY_SHADER);
+        char_pointer_source = geometry_shader_source.c_str();
+        length_pointer = geometry_shader_source.length();
+        glShaderSource(geometry_shader, 1, &char_pointer_source, &length_pointer);
+        glCompileShader(geometry_shader);
+        check_shader_error(geometry_shader, GL_COMPILE_STATUS, false);
+        glAttachShader(program, geometry_shader);
+    }
 
     char_pointer_source = fragment_shader_source.c_str();
     length_pointer = fragment_shader_source.length();
@@ -46,8 +65,10 @@ Shader::Shader() {
 
     glDetachShader(this->program, this->vertex_shader);
     glDeleteShader(this->vertex_shader);
-    glDetachShader(this->program, this->geometry_shader);
-    glDeleteShader(this->geometry_shader);
+    if (geometry_shader_source != "") {
+        glDetachShader(this->program, this->geometry_shader);
+        glDeleteShader(this->geometry_shader);
+    }
     glDetachShader(this->program, this->fragment_shader);
     glDeleteShader(this->fragment_shader);
 }

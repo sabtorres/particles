@@ -4,18 +4,18 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <particle_source.hpp>
+#include <grid.hpp>
 #include <shader.hpp>
 #include <renderer.hpp>
 #include <menu.hpp>
 
-const uint WINDOW_WIDTH = 1920;
-const uint WINDOW_HEIGHT = 1080;
 double last_x, last_y;
 Renderer renderer;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void get_camera_input(GLFWwindow* window, double x_pos, double y_pos);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+void scroll_callback(GLFWwindow* window, double x_offset, double y_offset);
 
 int main() {
     glfwInit();
@@ -32,6 +32,7 @@ int main() {
     }
     glfwMakeContextCurrent(window);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetScrollCallback(window, scroll_callback);
     glfwGetCursorPos(window, &last_x, &last_y);
 
 
@@ -44,7 +45,7 @@ int main() {
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    glClearColor(0.1, 0.1, 0.1, 1.0);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBlendEquation(GL_FUNC_ADD);
@@ -52,6 +53,8 @@ int main() {
     // initialize
     Menu menu = Menu(window);
     Shader shader = Shader();
+    Grid grid = Grid();
+    Shader grid_shader = Shader("../shaders/grid_vertex.glsl", "../shaders/grid_fragment.glsl");
     ParticleSource source = ParticleSource();
     renderer = Renderer();
 
@@ -62,7 +65,7 @@ int main() {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         source.update(delta_time);
-        renderer.render(source, shader, WINDOW_WIDTH, WINDOW_HEIGHT);
+        renderer.render(source, shader, grid, grid_shader);
         menu.render(source, delta_time);
         glfwSwapBuffers(window);
 
@@ -75,6 +78,8 @@ int main() {
     menu.cleanup();
     source.cleanup();
     shader.cleanup();
+    grid.cleanup();
+    grid_shader.cleanup();
     glfwTerminate();
 
     return 0;
@@ -110,13 +115,28 @@ void get_camera_input(GLFWwindow* window, double x_pos, double y_pos) {
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glfwSetCursorPosCallback(window, get_camera_input);
     }
     
-    else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+    else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         glfwSetCursorPosCallback(window, nullptr);
+    }
+}
+
+void scroll_callback(GLFWwindow* window, double x_offset, double y_offset) {
+    float sensitivity = 0.5;
+    float min_zoom = 0.1;
+    float max_zoom = 1000.0;
+
+    renderer.zoom -= y_offset * sensitivity;
+    if (renderer.zoom > max_zoom) {
+        renderer.zoom = max_zoom;
+    }
+
+    if (renderer.zoom < min_zoom) {
+        renderer.zoom = min_zoom;
     }
 }

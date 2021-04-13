@@ -7,6 +7,8 @@ my goal is to build a particle simulation system that can be customizable by art
 
 # features
 
+- camera control: press the right mouse button to rotate the camera and scroll for zoom
+
 - GPU compute support for particle dynamics
 
 - user is able to put a custom texture
@@ -17,7 +19,7 @@ my goal is to build a particle simulation system that can be customizable by art
 
 # to-do list
 
-- camera input and grid for better 3D view
+no features are on the list right now.
 
 # maybe to-dos (these features are lesser priority and may or may not go to the list above)
 
