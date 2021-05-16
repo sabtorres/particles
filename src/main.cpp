@@ -14,6 +14,7 @@ Renderer renderer;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void get_camera_input(GLFWwindow* window, double x_pos, double y_pos);
+void update_cursor(GLFWwindow* window, double x_pos, double y_pos);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow* window, double x_offset, double y_offset);
 
@@ -33,8 +34,8 @@ int main() {
     glfwMakeContextCurrent(window);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetCursorPosCallback(window, update_cursor);
     glfwGetCursorPos(window, &last_x, &last_y);
-
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout<<"Failed to initialize GLAD\n";
@@ -114,6 +115,13 @@ void get_camera_input(GLFWwindow* window, double x_pos, double y_pos) {
     renderer.camera_position = glm::normalize(direction);
 }
 
+void update_cursor(GLFWwindow* window, double x_pos, double y_pos) {
+    float x_offset = x_pos - last_x;
+    float y_offset = last_y - y_pos; 
+    last_x = x_pos;
+    last_y = y_pos;
+}
+
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -122,7 +130,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     
     else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        glfwSetCursorPosCallback(window, nullptr);
+        glfwSetCursorPosCallback(window, update_cursor);
     }
 }
 
